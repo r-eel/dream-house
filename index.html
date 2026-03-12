@@ -157,7 +157,7 @@ scene.background = new THREE.Color(0x87CEEB); // Sky blue
 scene.fog = new THREE.FogExp2(0xC8D8E8, 0.004);
 
 const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 500);
-camera.position.set(55, 35, 65);
+camera.position.set(55, 50, 55);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
@@ -280,7 +280,7 @@ function stoneTexture(w=256, h=256) {
 // ═══════════════════════════════════════════════════
 const M = {
   brick: new THREE.MeshStandardMaterial({ map: brickTexture(), roughness: 0.85, metalness: 0 }),
-  brickTrans: new THREE.MeshStandardMaterial({ map: brickTexture(), roughness: 0.85, transparent: true, opacity: 0.4 }),
+  brickTrans: new THREE.MeshStandardMaterial({ map: brickTexture(), roughness: 0.85, transparent: true, opacity: 0.25 }),
   walnut: new THREE.MeshStandardMaterial({ map: woodTexture(256,256,'#5C3A1E'), roughness: 0.6, metalness: 0.05 }),
   walnutFloor: new THREE.MeshStandardMaterial({ map: woodTexture(512,512,'#7A5A3A'), roughness: 0.5, metalness: 0.05 }),
   oak: new THREE.MeshStandardMaterial({ map: woodTexture(256,256,'#8B7355'), roughness: 0.55, metalness: 0.05 }),
@@ -519,8 +519,7 @@ const WT = 0.5; // wall thickness
 // ═══════════════════════════════════════════════════
 // Floor
 box(W, 0.3, D, M.stoneFloor, G.basement, 0, FY.B, 0);
-// Ceiling
-box(W, 0.3, D, M.cream, G.basement, 0, FY.F1-0.15, 0);
+// (ceiling removed for visibility)
 
 // Walls
 wall(-W/2+WT/2, 0, WT, D, SH, FY.B, M.creamWall, G.basement);
@@ -562,7 +561,7 @@ for(let i=-2; i<=2; i++) {
 // FLOOR 1
 // ═══════════════════════════════════════════════════
 box(W, 0.3, D, M.walnutFloor, G.floor1, 0, FY.F1, 0);
-box(W, 0.3, D, M.cream, G.floor1, 0, FY.F2-0.15, 0);
+// (ceiling removed for visibility)
 
 // Interior walls
 wall(0, -10, WT, 16, SH, FY.F1, M.creamWall, G.floor1); // Foyer wall
@@ -625,7 +624,7 @@ toilet(-6, 12, FY.F1+0.15, G.floor1);
 // FLOOR 2
 // ═══════════════════════════════════════════════════
 box(44, 0.3, 32, M.walnutFloor, G.floor2, -2, FY.F2, 0);
-box(44, 0.3, 32, M.cream, G.floor2, -2, FY.F3-0.15, 0);
+// (ceiling removed for visibility)
 
 // Walls
 wall(-24+WT/2, 0, WT, 32, SH, FY.F2, M.creamWall, G.floor2);
@@ -939,12 +938,13 @@ document.querySelectorAll('.floor-btn').forEach(btn => {
     const f = btn.dataset.floor;
     if(f==='all') {
       Object.values(G).forEach(g=>{g.visible=true});
-      M.brickTrans.opacity = 0.4;
+      M.brickTrans.opacity = 0.25;
     } else {
       Object.entries(G).forEach(([k,g])=>{
-        g.visible = k===f || (k==='outdoor' && f!=='outdoor');
+        g.visible = k===f;
       });
       G.structure.visible = false;
+      G.outdoor.visible = true; // always show ground
     }
     if(selectedRoom){selectedRoom.mesh.material=selectedRoom.material;selectedRoom=null;roomInfoEl.classList.remove('visible');}
   });
@@ -971,7 +971,7 @@ document.getElementById('btn-top').onclick=()=>{
   document.getElementById('btn-top').classList.add('active');
 };
 document.getElementById('btn-3d').onclick=()=>{
-  animateTo(camera.position,{x:55,y:35,z:65});animateTo(controls.target,{x:0,y:6,z:0});
+  animateTo(camera.position,{x:55,y:50,z:55});animateTo(controls.target,{x:0,y:6,z:0});
   document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('btn-3d').classList.add('active');
 };
