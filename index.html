@@ -860,8 +860,8 @@ tree(-40, -30, FY.F1, G.outdoor, 0.8);
 // Bushes around house
 for(let i=-20; i<=20; i+=5) {
   const bMat = new THREE.MeshStandardMaterial({color:new THREE.Color(0.12+Math.random()*0.08, 0.28+Math.random()*0.12, 0.06+Math.random()*0.04),roughness:0.9});
-  cyl(1.5, 1.5, 2, 8, bMat, G.outdoor, i, FY.F1+1, -D/2+1);
-  if(Math.abs(i)<18) cyl(1.5, 1.5, 2, 8, bMat, G.outdoor, i, FY.F1+1, D/2-1);
+  cyl(1.5, 1.5, 2, 8, bMat, G.outdoor, i, FY.F1+1, -D/2-2.5);
+  if(Math.abs(i)<18) cyl(1.5, 1.5, 2, 8, bMat, G.outdoor, i, FY.F1+1, D/2+2.5);
 }
 
 // ═══════════════════════════════════════════════════
