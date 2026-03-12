@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emma & Rob's Dream House</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #1a1612;
+    color: #e8e0d4;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  #canvas-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  canvas { display: block; }
+
+  /* Header */
+  #header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 16px 24px;
+    background: linear-gradient(180deg, rgba(26,22,18,0.95) 0%, rgba(26,22,18,0) 100%);
+    z-index: 10;
+    pointer-events: none;
+  }
+  #header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #d4a574;
+    letter-spacing: 0.05em;
+  }
+  #header p {
+    font-size: 0.75rem;
+    color: #9a8b7a;
+    margin-top: 2px;
+    letter-spacing: 0.03em;
+  }
+
+  /* Floor Toggle Panel */
+  #floor-panel {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+  }
+  .floor-btn {
+    width: 120px;
+    padding: 10px 14px;
+    background: rgba(42, 36, 28, 0.9);
+    border: 1px solid rgba(212, 165, 116, 0.3);
+    border-radius: 8px;
+    color: #c4a882;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+    backdrop-filter: blur(10px);
+  }
+  .floor-btn:hover {
+    background: rgba(62, 52, 38, 0.95);
+    border-color: rgba(212, 165, 116, 0.6);
+  }
+  .floor-btn.active {
+    background: rgba(212, 165, 116, 0.15);
+    border-color: #d4a574;
+    color: #e8d4bc;
+  }
+  .floor-btn .floor-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    display: block;
+    margin-bottom: 2px;
+    color: #d4a574;
+  }
+
+  /* Room Info Panel */
+  #room-info {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 14px 28px;
+    background: rgba(42, 36, 28, 0.92);
+    border: 1px solid rgba(212, 165, 116, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    z-index: 10;
+    text-align: center;
+    transition: all 0.3s;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #room-info.visible {
+    opacity: 1;
+  }
+  #room-info .room-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: #d4a574;
+    margin-bottom: 4px;
+  }
+  #room-info .room-desc {
+    font-size: 0.72rem;
+    color: #9a8b7a;
+    letter-spacing: 0.02em;
+  }
+
+  /* View Mode Buttons */
+  #view-panel {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+  }
+  .view-btn {
+    width: 44px;
+    height: 44px;
+    background: rgba(42, 36, 28, 0.9);
+    border: 1px solid rgba(212, 165, 116, 0.3);
+    border-radius: 8px;
+    color: #c4a882;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  .view-btn:hover {
+    background: rgba(62, 52, 38, 0.95);
+    border-color: rgba(212, 165, 116, 0.6);
+  }
+  .view-btn.active {
+    background: rgba(212, 165, 116, 0.15);
+    border-color: #d4a574;
+  }
+
+  /* Legend */
+  #legend {
+    position: absolute;
+    bottom: 24px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 10;
+    font-size: 0.6rem;
+    color: #9a8b7a;
+    letter-spacing: 0.03em;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  /* Instructions */
+  #instructions {
+    position: absolute;
+    bottom: 24px;
+    left: 20px;
+    font-size: 0.6rem;
+    color: #6a5d50;
+    z-index: 10;
+    line-height: 1.5;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 768px) {
+    #floor-panel { left: 10px; }
+    .floor-btn { width: 90px; padding: 8px 10px; font-size: 0.6rem; }
+    .floor-btn .floor-label { font-size: 0.75rem; }
+    #header h1 { font-size: 1.1rem; }
+    #view-panel { right: 10px; }
+    .view-btn { width: 36px; height: 36px; font-size: 0.9rem; }
+    #legend { display: none; }
+    #instructions { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container">
+  <div id="header">
+    <h1>Emma & Rob's Dream House</h1>
+    <p>Interactive 3D Model — Click rooms to explore</p>
+  </div>
+
+  <div id="floor-panel">
+    <button class="floor-btn active" data-floor="all">
+      <span class="floor-label">All Floors</span>
+      Full View
+    </button>
+    <button class="floor-btn" data-floor="basement">
+      <span class="floor-label">Basement</span>
+      Theatre & Bar
+    </button>
+    <button class="floor-btn" data-floor="floor1">
+      <span class="floor-label">Floor 1</span>
+      Living & Kitchen
+    </button>
+    <button class="floor-btn" data-floor="floor2">
+      <span class="floor-label">Floor 2</span>
+      Bedrooms & Laundry
+    </button>
+    <button class="floor-btn" data-floor="floor3">
+      <span class="floor-label">Floor 3</span>
+      Master Suite
+    </button>
+    <button class="floor-btn" data-floor="outdoor">
+      <span class="floor-label">Outdoor</span>
+      Patio & Fire Pit
+    </button>
+  </div>
+
+  <div id="view-panel">
+    <button class="view-btn" id="btn-top" title="Top View">⬆</button>
+    <button class="view-btn active" id="btn-3d" title="3D View">◆</button>
+    <button class="view-btn" id="btn-front" title="Front View">▣</button>
+  </div>
+
+  <div id="room-info">
+    <div class="room-name" id="room-name">Living Room</div>
+    <div class="room-desc" id="room-desc">High ceilings, fireplace, drop-down projector, U-shaped couch</div>
+  </div>
+
+  <div id="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:#8B6F47"></div> Living Spaces</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#6B8E5A"></div> Kitchen & Dining</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#7A6B8A"></div> Bedrooms</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#5A8B8B"></div> Bathrooms</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#9A7B5A"></div> Utility</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#A0522D"></div> Garage</div>
+  </div>
+
+  <div id="instructions">
+    Drag to rotate · Scroll to zoom · Click rooms for details
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+
+// ─── Scene Setup ────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1612);
+scene.fog = new THREE.Fog(0x1a1612, 80, 200);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 500);
+camera.position.set(50, 40, 60);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 15;
+controls.maxDistance = 120;
+controls.maxPolarAngle = Math.PI / 2.1;
+controls.target.set(0, 8, 0);
+
+// ─── Lighting ────────────────────────────
+const ambientLight = new THREE.AmbientLight(0xffeedd, 0.4);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+dirLight.position.set(30, 50, 20);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.set(2048, 2048);
+dirLight.shadow.camera.far = 150;
+dirLight.shadow.camera.left = -60;
+dirLight.shadow.camera.right = 60;
+dirLight.shadow.camera.top = 60;
+dirLight.shadow.camera.bottom = -60;
+scene.add(dirLight);
+
+const fillLight = new THREE.DirectionalLight(0xd4a574, 0.3);
+fillLight.position.set(-20, 30, -10);
+scene.add(fillLight);
+
+const hemiLight = new THREE.HemisphereLight(0xffeedd, 0x3a2a1a, 0.3);
+scene.add(hemiLight);
+
+// ─── Materials ────────────────────────────
+const materials = {
+  brick: new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.9, metalness: 0.0, transparent: true, opacity: 0.35 }),
+  brickDark: new THREE.MeshStandardMaterial({ color: 0x6B3410, roughness: 0.9, metalness: 0.0, transparent: true, opacity: 0.35 }),
+  walnut: new THREE.MeshStandardMaterial({ color: 0x5C3A1E, roughness: 0.7, metalness: 0.1 }),
+  walnutLight: new THREE.MeshStandardMaterial({ color: 0x8B6F47, roughness: 0.6, metalness: 0.1 }),
+  stone: new THREE.MeshStandardMaterial({ color: 0x9A9080, roughness: 0.85, metalness: 0.0 }),
+  stoneFloor: new THREE.MeshStandardMaterial({ color: 0x7A7060, roughness: 0.8, metalness: 0.0 }),
+  cream: new THREE.MeshStandardMaterial({ color: 0xE8DDD0, roughness: 0.8, metalness: 0.0 }),
+  warmWhite: new THREE.MeshStandardMaterial({ color: 0xF5EDE0, roughness: 0.9, metalness: 0.0 }),
+  roof: new THREE.MeshStandardMaterial({ color: 0x3A2A1A, roughness: 0.85, metalness: 0.1, transparent: true, opacity: 0.5 }),
+  glass: new THREE.MeshStandardMaterial({ color: 0x88BBDD, roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.3 }),
+  stainedGlass: new THREE.MeshStandardMaterial({ color: 0x44AA66, roughness: 0.2, metalness: 0.1, transparent: true, opacity: 0.5 }),
+  grass: new THREE.MeshStandardMaterial({ color: 0x4A6B35, roughness: 0.95, metalness: 0.0 }),
+  patio: new THREE.MeshStandardMaterial({ color: 0x8A7A68, roughness: 0.85, metalness: 0.0 }),
+  // Room-coded colors (translucent for floor plans)
+  living: new THREE.MeshStandardMaterial({ color: 0x8B6F47, roughness: 0.7, metalness: 0.0, transparent: true, opacity: 0.85 }),
+  kitchen: new THREE.MeshStandardMaterial({ color: 0x6B8E5A, roughness: 0.7, metalness: 0.0, transparent: true, opacity: 0.85 }),
+  bedroom: new THREE.MeshStandardMaterial({ color: 0x7A6B8A, roughness: 0.7, metalness: 0.0, transparent: true, opacity: 0.85 }),
+  bathroom: new THREE.MeshStandardMaterial({ color: 0x5A8B8B, roughness: 0.7, metalness: 0.0, transparent: true, opacity: 0.85 }),
+  utility: new THREE.MeshStandardMaterial({ color: 0x9A7B5A, roughness: 0.7, metalness: 0.0, transparent: true, opacity: 0.85 }),
+  garage: new THREE.MeshStandardMaterial({ color: 0xA0522D, roughness: 0.8, metalness: 0.0, transparent: true, opacity: 0.85 }),
+  theatre: new THREE.MeshStandardMaterial({ color: 0x4A3A5A, roughness: 0.7, metalness: 0.0, transparent: true, opacity: 0.85 }),
+  bar: new THREE.MeshStandardMaterial({ color: 0x6B4A3A, roughness: 0.7, metalness: 0.0, transparent: true, opacity: 0.85 }),
+  master: new THREE.MeshStandardMaterial({ color: 0x8A6B7A, roughness: 0.7, metalness: 0.0, transparent: true, opacity: 0.85 }),
+  foyer: new THREE.MeshStandardMaterial({ color: 0xAA9070, roughness: 0.7, metalness: 0.0, transparent: true, opacity: 0.85 }),
+  office: new THREE.MeshStandardMaterial({ color: 0x7A8B6A, roughness: 0.7, metalness: 0.0, transparent: true, opacity: 0.85 }),
+};
+
+// Highlight material
+const highlightMat = new THREE.MeshStandardMaterial({ 
+  color: 0xd4a574, roughness: 0.5, metalness: 0.1, transparent: true, opacity: 0.9,
+  emissive: 0xd4a574, emissiveIntensity: 0.15
+});
+
+// ─── Floor Groups ────────────────────────────
+const floorGroups = {
+  basement: new THREE.Group(),
+  floor1: new THREE.Group(),
+  floor2: new THREE.Group(),
+  floor3: new THREE.Group(),
+  outdoor: new THREE.Group(),
+  structure: new THREE.Group(), // exterior walls, roof
+};
+Object.values(floorGroups).forEach(g => scene.add(g));
+
+// ─── Room Data ────────────────────────────
+const rooms = [];
+const WALL_H = 0.3;
+const FLOOR_H = 0.15;
+
+// Dimensions (in "feet" scaled to units)
+// House footprint: ~60 x 40, centered at origin
+const W = 60, D = 40;
+const FLOOR_Y = { basement: -10, floor1: 0, floor2: 11, floor3: 22 };
+const STORY_H = 10;
+
+function createRoom(name, desc, x, z, w, d, h, y, material, group, floorKey) {
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const mesh = new THREE.Mesh(geo, material);
+  mesh.position.set(x, y + h/2, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  group.add(mesh);
+
+  // Room walls (wireframe outline)
+  const edges = new THREE.EdgesGeometry(geo);
+  const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xd4a574, transparent: true, opacity: 0.4 }));
+  line.position.copy(mesh.position);
+  group.add(line);
+
+  rooms.push({ name, desc, mesh, material, line, floor: floorKey });
+  return mesh;
+}
+
+function createWall(x, z, w, d, h, y, material, group) {
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const mesh = new THREE.Mesh(geo, material);
+  mesh.position.set(x, y + h/2, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  group.add(mesh);
+  return mesh;
+}
+
+// ─── BASEMENT (y = -10) ────────────────────────────
+const BY = FLOOR_Y.basement;
+
+// Floor slab
+createWall(0, 0, W, D, FLOOR_H, BY, materials.stoneFloor, floorGroups.basement);
+
+createRoom('Movie Theatre', 'Surround sound, tiered seating, drop-down screen — movie nights with the kids', 
+  -10, -5, 25, 18, STORY_H, BY + FLOOR_H, materials.theatre, floorGroups.basement, 'basement');
+
+createRoom('Bar & Lounge', 'Drink station with stools, entertaining space for friends & family',
+  15, -5, 20, 18, STORY_H, BY + FLOOR_H, materials.bar, floorGroups.basement, 'basement');
+
+createRoom('Kids Play Area', 'Open play space — safe, fun, connected to the rest of the basement',
+  0, 12, 30, 12, STORY_H, BY + FLOOR_H, materials.living, floorGroups.basement, 'basement');
+
+createRoom('Basement Bathroom', 'Half bath for the basement level',
+  25, 12, 8, 8, STORY_H, BY + FLOOR_H, materials.bathroom, floorGroups.basement, 'basement');
+
+// ─── FLOOR 1 (y = 0) ────────────────────────────
+const F1Y = FLOOR_Y.floor1;
+
+// Floor slab
+createWall(0, 0, W, D, FLOOR_H, F1Y, materials.walnutLight, floorGroups.floor1);
+
+// Grand Foyer with staircase
+createRoom('Grand Foyer', 'Double doors, high ceiling entry with staircase to 2nd floor — the first impression',
+  0, -15, 14, 10, STORY_H + 4, F1Y + FLOOR_H, materials.foyer, floorGroups.floor1, 'floor1');
+
+// Living Room
+createRoom('Living Room', 'High ceilings, stone fireplace, drop-down projector, large U-shaped modular couch',
+  -18, -8, 20, 18, STORY_H + 4, F1Y + FLOOR_H, materials.living, floorGroups.floor1, 'floor1');
+
+// Kitchen
+createRoom('Kitchen', 'Warm walnut cabinets, stone counters, flows into the dining room',
+  18, -10, 18, 14, STORY_H, F1Y + FLOOR_H, materials.kitchen, floorGroups.floor1, 'floor1');
+
+// Dining Room
+createRoom('Dining Room', 'Long estate table with built-in bench seating along bay window wall',
+  18, 5, 18, 12, STORY_H, F1Y + FLOOR_H, materials.kitchen, floorGroups.floor1, 'floor1');
+
+// Office
+createRoom('Office', 'Lots of windows, bay window seating area — Rob\'s remote work headquarters',
+  -18, 10, 20, 14, STORY_H, F1Y + FLOOR_H, materials.office, floorGroups.floor1, 'floor1');
+
+// Mud Room
+createRoom('Mud Room', 'Connects 3-car garage to kitchen — drop your stuff here',
+  26, -3, 8, 8, STORY_H, F1Y + FLOOR_H, materials.utility, floorGroups.floor1, 'floor1');
+
+// 3-Car Garage
+createRoom('3-Car Garage', 'Three-car garage leading into the mud room',
+  26, 12, 14, 16, STORY_H, F1Y + FLOOR_H, materials.garage, floorGroups.floor1, 'floor1');
+
+// Main Floor Bathroom
+createRoom('Main Bathroom', 'Full bath on the main floor',
+  -5, 14, 8, 8, STORY_H, F1Y + FLOOR_H, materials.bathroom, floorGroups.floor1, 'floor1');
+
+// ─── FLOOR 2 (y = 11) ────────────────────────────
+const F2Y = FLOOR_Y.floor2;
+
+// Floor slab
+createWall(0, -2, 48, 36, FLOOR_H, F2Y, materials.walnutLight, floorGroups.floor2);
+
+createRoom('Bedroom 1', 'Spacious bedroom with closet — earth tones, cozy',
+  -14, -12, 16, 14, STORY_H, F2Y + FLOOR_H, materials.bedroom, floorGroups.floor2, 'floor2');
+
+createRoom('Bedroom 2', 'Second bedroom with views — warm and inviting',
+  -14, 4, 16, 14, STORY_H, F2Y + FLOOR_H, materials.bedroom, floorGroups.floor2, 'floor2');
+
+createRoom('Full Bathroom', 'Full bath with stone tile and walnut vanity',
+  4, -12, 10, 10, STORY_H, F2Y + FLOOR_H, materials.bathroom, floorGroups.floor2, 'floor2');
+
+createRoom('Half Bath', 'Half bath for floor 2',
+  4, 1, 8, 8, STORY_H, F2Y + FLOOR_H, materials.bathroom, floorGroups.floor2, 'floor2');
+
+createRoom('Laundry Room', 'Washer, dryer, folding station — keeping it convenient on floor 2',
+  4, 10, 10, 8, STORY_H, F2Y + FLOOR_H, materials.utility, floorGroups.floor2, 'floor2');
+
+createRoom('Hallway & Stairs', 'Connects all rooms with staircase up to floor 3',
+  16, 0, 10, 24, STORY_H, F2Y + FLOOR_H, materials.foyer, floorGroups.floor2, 'floor2');
+
+// ─── FLOOR 3 (y = 22) ────────────────────────────
+const F3Y = FLOOR_Y.floor3;
+
+// Floor slab
+createWall(0, -2, 48, 36, FLOOR_H, F3Y, materials.walnutLight, floorGroups.floor3);
+
+createRoom('Bedroom 3', 'Third bedroom — cozy retreat with vintage touches',
+  -14, -12, 14, 12, STORY_H, F3Y + FLOOR_H, materials.bedroom, floorGroups.floor3, 'floor3');
+
+createRoom('Bedroom 4', 'Fourth bedroom — warm lighting, exposed beams',
+  -14, 4, 14, 12, STORY_H, F3Y + FLOOR_H, materials.bedroom, floorGroups.floor3, 'floor3');
+
+// Master Suite
+createRoom('Master Bedroom', 'The sanctuary — king bed, exposed beams, warm walnut, the ultimate cozy retreat',
+  10, -6, 22, 18, STORY_H + 2, F3Y + FLOOR_H, materials.master, floorGroups.floor3, 'floor3');
+
+createRoom('Walk-in Closet', 'Emma\'s dream closet — space for ALL the clothes',
+  10, 10, 12, 8, STORY_H, F3Y + FLOOR_H, materials.master, floorGroups.floor3, 'floor3');
+
+createRoom('Master Bathroom', 'Double vanity, clawfoot soaking tub, huge walk-in shower (dual heads + rain head, 6\'4" approved)',
+  22, 8, 10, 12, STORY_H, F3Y + FLOOR_H, materials.bathroom, floorGroups.floor3, 'floor3');
+
+// Balcony with hot tub
+createRoom('Balcony & Hot Tub', 'Private balcony off the master suite — hot tub under the stars ✨',
+  24, -10, 8, 10, 1, F3Y + FLOOR_H, materials.patio, floorGroups.floor3, 'floor3');
+
+// ─── EXTERIOR STRUCTURE ────────────────────────────
+
+// Exterior walls (thin shell around the house)
+const extWallThickness = 0.8;
+const totalH = 34;
+
+// Front wall
+createWall(0, -D/2, W + 2, extWallThickness, totalH, FLOOR_Y.basement, materials.brick, floorGroups.structure);
+// Back wall
+createWall(0, D/2, W + 2, extWallThickness, totalH, FLOOR_Y.basement, materials.brick, floorGroups.structure);
+// Left wall
+createWall(-W/2, 0, extWallThickness, D, totalH, FLOOR_Y.basement, materials.brick, floorGroups.structure);
+// Right wall
+createWall(W/2, 0, extWallThickness, D, totalH, FLOOR_Y.basement, materials.brick, floorGroups.structure);
+
+// Roof
+const roofGeo = new THREE.ConeGeometry(38, 10, 4);
+const roofMesh = new THREE.Mesh(roofGeo, materials.roof);
+roofMesh.position.set(0, FLOOR_Y.floor3 + STORY_H + 6, 0);
+roofMesh.rotation.y = Math.PI / 4;
+roofMesh.castShadow = true;
+floorGroups.structure.add(roofMesh);
+
+// Windows (glass panels on exterior)
+function addWindow(x, y, z, w, h, rotY = 0) {
+  const geo = new THREE.PlaneGeometry(w, h);
+  const mesh = new THREE.Mesh(geo, materials.glass);
+  mesh.position.set(x, y, z);
+  mesh.rotation.y = rotY;
+  floorGroups.structure.add(mesh);
+}
+
+// Front windows
+for (let i = -20; i <= 20; i += 10) {
+  addWindow(i, 6, -D/2 + 0.5, 5, 6);
+  addWindow(i, 17, -D/2 + 0.5, 4, 5);
+  addWindow(i, 28, -D/2 + 0.5, 4, 5);
+}
+
+// Side windows
+for (let i = -12; i <= 12; i += 12) {
+  addWindow(-W/2 + 0.5, 6, i, 5, 6, Math.PI/2);
+  addWindow(W/2 - 0.5, 6, i, 5, 6, Math.PI/2);
+  addWindow(-W/2 + 0.5, 17, i, 4, 5, Math.PI/2);
+  addWindow(W/2 - 0.5, 17, i, 4, 5, Math.PI/2);
+}
+
+// Stained glass accent (front door area)
+const sgGeo = new THREE.CircleGeometry(2.5, 32);
+const sgMesh = new THREE.Mesh(sgGeo, materials.stainedGlass);
+sgMesh.position.set(0, 10, -D/2 + 0.5);
+floorGroups.structure.add(sgMesh);
+
+// Front doors
+const doorGeo = new THREE.BoxGeometry(8, 9, 0.5);
+const doorMesh = new THREE.Mesh(doorGeo, materials.walnut);
+doorMesh.position.set(0, 4.5, -D/2 + 0.3);
+floorGroups.structure.add(doorMesh);
+
+// ─── OUTDOOR ────────────────────────────
+
+// Ground plane
+const groundGeo = new THREE.PlaneGeometry(200, 200);
+const groundMesh = new THREE.Mesh(groundGeo, materials.grass);
+groundMesh.rotation.x = -Math.PI / 2;
+groundMesh.position.y = FLOOR_Y.floor1 - 0.1;
+groundMesh.receiveShadow = true;
+floorGroups.outdoor.add(groundMesh);
+
+// Patio
+createRoom('Patio', 'Outdoor entertaining — grill, seating, umbrellas under the open sky',
+  -10, -28, 24, 12, 0.3, F1Y - 0.1, materials.patio, floorGroups.outdoor, 'outdoor');
+
+// Fire pit
+const fpGeo = new THREE.CylinderGeometry(3, 3.5, 1.5, 16);
+const fpMesh = new THREE.Mesh(fpGeo, materials.stone);
+fpMesh.position.set(-10, F1Y + 0.75, -38);
+floorGroups.outdoor.add(fpMesh);
+
+// Fire glow
+const fireLight = new THREE.PointLight(0xff6622, 0.8, 15);
+fireLight.position.set(-10, F1Y + 2, -38);
+floorGroups.outdoor.add(fireLight);
+
+// Fire pit inner glow
+const fpInnerGeo = new THREE.CylinderGeometry(2, 2, 0.5, 16);
+const fpInnerMat = new THREE.MeshStandardMaterial({ color: 0xff4400, emissive: 0xff4400, emissiveIntensity: 0.5 });
+const fpInnerMesh = new THREE.Mesh(fpInnerGeo, fpInnerMat);
+fpInnerMesh.position.set(-10, F1Y + 1, -38);
+floorGroups.outdoor.add(fpInnerMesh);
+
+// Label it
+rooms.push({ 
+  name: 'Fire Pit', 
+  desc: 'Gather around — s\'mores, stargazing, and good conversations', 
+  mesh: fpMesh, 
+  material: materials.stone, 
+  line: null, 
+  floor: 'outdoor' 
+});
+
+// Driveway
+const driveGeo = new THREE.PlaneGeometry(16, 30);
+const driveMat = new THREE.MeshStandardMaterial({ color: 0x6A6058, roughness: 0.9 });
+const driveMesh = new THREE.Mesh(driveGeo, driveMat);
+driveMesh.rotation.x = -Math.PI / 2;
+driveMesh.position.set(26, F1Y + 0.05, 28);
+floorGroups.outdoor.add(driveMesh);
+
+// ─── Room Labels (3D text sprites) ────────────────────────────
+function createLabel(text, position, floor) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 512;
+  canvas.height = 64;
+  ctx.fillStyle = 'rgba(0,0,0,0)';
+  ctx.fillRect(0, 0, 512, 64);
+  ctx.font = '500 28px Inter, sans-serif';
+  ctx.fillStyle = '#d4a574';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 256, 32);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0.9 });
+  const sprite = new THREE.Sprite(spriteMat);
+  sprite.position.copy(position);
+  sprite.scale.set(14, 1.8, 1);
+
+  const floorGroup = floorGroups[floor] || floorGroups.floor1;
+  floorGroup.add(sprite);
+  return sprite;
+}
+
+// Add labels to key rooms
+createLabel('🎬 Theatre', new THREE.Vector3(-10, BY + 7, -5), 'basement');
+createLabel('🍸 Bar', new THREE.Vector3(15, BY + 7, -5), 'basement');
+createLabel('🎮 Play Area', new THREE.Vector3(0, BY + 7, 12), 'basement');
+
+createLabel('🚪 Grand Foyer', new THREE.Vector3(0, F1Y + 8, -15), 'floor1');
+createLabel('🛋 Living Room', new THREE.Vector3(-18, F1Y + 9, -8), 'floor1');
+createLabel('🍳 Kitchen', new THREE.Vector3(18, F1Y + 6, -10), 'floor1');
+createLabel('🍽 Dining', new THREE.Vector3(18, F1Y + 6, 5), 'floor1');
+createLabel('📚 Office', new THREE.Vector3(-18, F1Y + 6, 10), 'floor1');
+createLabel('🚗 Garage', new THREE.Vector3(26, F1Y + 6, 12), 'floor1');
+
+createLabel('🛏 Bedroom 1', new THREE.Vector3(-14, F2Y + 6, -12), 'floor2');
+createLabel('🛏 Bedroom 2', new THREE.Vector3(-14, F2Y + 6, 4), 'floor2');
+createLabel('👕 Laundry', new THREE.Vector3(4, F2Y + 6, 10), 'floor2');
+
+createLabel('🛏 Bedroom 3', new THREE.Vector3(-14, F3Y + 6, -12), 'floor3');
+createLabel('🛏 Bedroom 4', new THREE.Vector3(-14, F3Y + 6, 4), 'floor3');
+createLabel('👑 Master Bed', new THREE.Vector3(10, F3Y + 7, -6), 'floor3');
+createLabel('👗 Closet', new THREE.Vector3(10, F3Y + 6, 10), 'floor3');
+createLabel('🛁 Master Bath', new THREE.Vector3(22, F3Y + 6, 8), 'floor3');
+createLabel('♨️ Hot Tub', new THREE.Vector3(24, F3Y + 3, -10), 'floor3');
+
+createLabel('🔥 Fire Pit', new THREE.Vector3(-10, F1Y + 3, -38), 'outdoor');
+createLabel('🪑 Patio', new THREE.Vector3(-10, F1Y + 3, -28), 'outdoor');
+
+// ─── Raycasting for Room Selection ────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let selectedRoom = null;
+
+const roomInfoEl = document.getElementById('room-info');
+const roomNameEl = document.getElementById('room-name');
+const roomDescEl = document.getElementById('room-desc');
+
+function onPointerDown(event) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = rooms.map(r => r.mesh);
+  const intersects = raycaster.intersectObjects(meshes);
+
+  // Reset previous
+  if (selectedRoom) {
+    selectedRoom.mesh.material = selectedRoom.material;
+  }
+
+  if (intersects.length > 0) {
+    const hit = intersects[0].object;
+    const room = rooms.find(r => r.mesh === hit);
+    if (room) {
+      selectedRoom = room;
+      room.mesh.material = highlightMat;
+      roomNameEl.textContent = room.name;
+      roomDescEl.textContent = room.desc;
+      roomInfoEl.classList.add('visible');
+    }
+  } else {
+    selectedRoom = null;
+    roomInfoEl.classList.remove('visible');
+  }
+}
+
+renderer.domElement.addEventListener('pointerdown', onPointerDown);
+
+// ─── Floor Toggling ────────────────────────────
+const floorBtns = document.querySelectorAll('.floor-btn');
+let activeFloor = 'all';
+
+floorBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    floorBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFloor = btn.dataset.floor;
+
+    if (activeFloor === 'all') {
+      Object.values(floorGroups).forEach(g => { g.visible = true; });
+      // Dim exterior walls
+      materials.brick.opacity = 0.35;
+      materials.brickDark.opacity = 0.35;
+      materials.roof.opacity = 0.5;
+    } else {
+      Object.entries(floorGroups).forEach(([key, g]) => {
+        if (key === 'structure') {
+          g.visible = false; // Hide exterior when viewing floors
+        } else if (key === 'outdoor') {
+          g.visible = activeFloor === 'outdoor';
+        } else {
+          g.visible = key === activeFloor;
+        }
+      });
+      // Always show outdoor ground as reference
+      if (activeFloor !== 'outdoor') {
+        floorGroups.outdoor.visible = true;
+        // But only the ground, not the patio rooms — handled by visibility
+      }
+    }
+
+    // Reset room selection
+    if (selectedRoom) {
+      selectedRoom.mesh.material = selectedRoom.material;
+      selectedRoom = null;
+      roomInfoEl.classList.remove('visible');
+    }
+  });
+});
+
+// ─── View Controls ────────────────────────────
+document.getElementById('btn-top').addEventListener('click', () => {
+  gsapTo(camera.position, { x: 0, y: 70, z: 0.1 }, 1000);
+  gsapTo(controls.target, { x: 0, y: 8, z: 0 }, 1000);
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-top').classList.add('active');
+});
+
+document.getElementById('btn-3d').addEventListener('click', () => {
+  gsapTo(camera.position, { x: 50, y: 40, z: 60 }, 1000);
+  gsapTo(controls.target, { x: 0, y: 8, z: 0 }, 1000);
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-3d').classList.add('active');
+});
+
+document.getElementById('btn-front').addEventListener('click', () => {
+  gsapTo(camera.position, { x: 0, y: 15, z: -70 }, 1000);
+  gsapTo(controls.target, { x: 0, y: 12, z: 0 }, 1000);
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-front').classList.add('active');
+});
+
+// Simple animation helper (no gsap dependency)
+function gsapTo(obj, target, duration) {
+  const start = { x: obj.x, y: obj.y, z: obj.z };
+  const startTime = performance.now();
+  function update(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    obj.x = start.x + (target.x - start.x) * ease;
+    obj.y = start.y + (target.y - start.y) * ease;
+    obj.z = start.z + (target.z - start.z) * ease;
+    if (t < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// ─── Animation Loop ────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+
+  // Gentle fire flicker
+  fireLight.intensity = 0.6 + Math.sin(Date.now() * 0.005) * 0.3;
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// ─── Resize Handler ────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+</script>
+</body>
+</html>
