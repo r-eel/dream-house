@@ -49,6 +49,43 @@
     letter-spacing: 0.03em;
   }
 
+  /* Collapsible Panel Toggle */
+  .panel-toggle {
+    width: 36px;
+    height: 36px;
+    background: rgba(42, 36, 28, 0.9);
+    border: 1px solid rgba(212, 165, 116, 0.4);
+    border-radius: 8px;
+    color: #d4a574;
+    font-size: 1rem;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    margin-bottom: 6px;
+  }
+  .panel-toggle:hover {
+    background: rgba(62, 52, 38, 0.95);
+    border-color: rgba(212, 165, 116, 0.7);
+  }
+  .panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    max-height: 500px;
+    opacity: 1;
+  }
+  .panel-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    gap: 0;
+    pointer-events: none;
+  }
+
   /* Floor Toggle Panel */
   #floor-panel {
     position: absolute;
@@ -57,7 +94,6 @@
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    gap: 8px;
     z-index: 10;
   }
   .floor-btn {
@@ -134,7 +170,6 @@
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    gap: 8px;
     z-index: 10;
   }
   .view-btn {
@@ -162,17 +197,38 @@
   }
 
   /* Legend */
-  #legend {
+  #legend-wrapper {
     position: absolute;
     bottom: max(90px, env(safe-area-inset-bottom, 24px) + 70px);
     right: 20px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  #legend {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    z-index: 10;
     font-size: 0.6rem;
     color: #9a8b7a;
     letter-spacing: 0.03em;
+    background: rgba(42, 36, 28, 0.85);
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(212, 165, 116, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    max-height: 200px;
+    opacity: 1;
+  }
+  #legend.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 12px;
+    pointer-events: none;
+    border-color: transparent;
   }
   .legend-item {
     display: flex;
@@ -218,6 +274,8 @@
   </div>
 
   <div id="floor-panel">
+    <button class="panel-toggle" id="toggle-floors" title="Toggle floor panel">🏠</button>
+    <div class="panel-content" id="floor-buttons">
     <button class="floor-btn active" data-floor="all">
       <span class="floor-label">All Floors</span>
       Full View
@@ -243,11 +301,15 @@
       Patio & Fire Pit
     </button>
   </div>
+  </div>
 
   <div id="view-panel">
+    <button class="panel-toggle" id="toggle-views" title="Toggle view panel">👁</button>
+    <div class="panel-content" id="view-buttons">
     <button class="view-btn" id="btn-top" title="Top View">⬆</button>
     <button class="view-btn active" id="btn-3d" title="3D View">◆</button>
     <button class="view-btn" id="btn-front" title="Front View">▣</button>
+    </div>
   </div>
 
   <div id="room-info">
@@ -255,13 +317,16 @@
     <div class="room-desc" id="room-desc">High ceilings, fireplace, drop-down projector, U-shaped couch</div>
   </div>
 
-  <div id="legend">
-    <div class="legend-item"><div class="legend-swatch" style="background:#8B6F47"></div> Living Spaces</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#6B8E5A"></div> Kitchen & Dining</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#7A6B8A"></div> Bedrooms</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#5A8B8B"></div> Bathrooms</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#9A7B5A"></div> Utility</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#A0522D"></div> Garage</div>
+  <div id="legend-wrapper">
+    <button class="panel-toggle" id="toggle-legend" title="Toggle color key" style="align-self:flex-end; margin-bottom: 6px;">🎨</button>
+    <div id="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#8B6F47"></div> Living Spaces</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#6B8E5A"></div> Kitchen & Dining</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#7A6B8A"></div> Bedrooms</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#5A8B8B"></div> Bathrooms</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#9A7B5A"></div> Utility</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#A0522D"></div> Garage</div>
+    </div>
   </div>
 
   <div id="instructions">
@@ -813,6 +878,23 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+
+// ─── Collapsible Panels ────────────────────────────
+document.getElementById('toggle-floors').addEventListener('click', () => {
+  document.getElementById('floor-buttons').classList.toggle('collapsed');
+});
+document.getElementById('toggle-views').addEventListener('click', () => {
+  document.getElementById('view-buttons').classList.toggle('collapsed');
+});
+document.getElementById('toggle-legend').addEventListener('click', () => {
+  document.getElementById('legend').classList.toggle('collapsed');
+});
+
+// Auto-collapse on mobile for more screen space
+if (window.innerWidth <= 768) {
+  document.getElementById('view-buttons').classList.add('collapsed');
+  document.getElementById('legend').classList.add('collapsed');
+}
 
 // ─── Resize Handler ────────────────────────────
 window.addEventListener('resize', () => {
