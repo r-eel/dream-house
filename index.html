@@ -186,10 +186,10 @@ sun.position.set(40, 60, 30);
 sun.castShadow = true;
 sun.shadow.mapSize.set(4096, 4096);
 sun.shadow.camera.far = 200;
-sun.shadow.camera.left = -80;
-sun.shadow.camera.right = 80;
-sun.shadow.camera.top = 80;
-sun.shadow.camera.bottom = -80;
+sun.shadow.camera.left = -100;
+sun.shadow.camera.right = 100;
+sun.shadow.camera.top = 100;
+sun.shadow.camera.bottom = -100;
 sun.shadow.bias = -0.0005;
 scene.add(sun);
 
@@ -765,8 +765,8 @@ roomFloor(-16, 8, 14, 12, FY.F1+0.2, M.floorLiving, 'Office',
   'Lots of windows, bay window seating — Rob\'s remote HQ 📚', G.floor1, 'floor1');
 roomFloor(22, 0, 6, 6, FY.F1+0.2, M.floorUtility, 'Mud Room',
   'Drop zone between garage and kitchen — hooks, bench, shoe storage 🧥', G.floor1, 'floor1');
-roomFloor(22, 12, 12, 10, FY.F1+0.2, M.floorUtility, 'Garage',
-  'Three-car garage → mudroom → kitchen 🚗', G.floor1, 'floor1');
+roomFloor(42, -2, 30, 20, FY.F1+0.2, M.floorUtility, 'Garage',
+  'Three-car attached garage → mudroom → kitchen 🚗', G.floor1, 'floor1');
 roomFloor(-4, 14, 6, 6, FY.F1+0.2, M.floorBath, 'Main Bathroom',
   'Full bath on the main floor — stone tile, walnut vanity 🚿', G.floor1, 'floor1');
 
@@ -829,6 +829,94 @@ box(8, 1.5, 2.5, M.couchFabric, G.floor1, -16, FY.F1+0.75, D/2-2);
 // Main bathroom
 vanity(-4, 16, FY.F1+0.15, 4, G.floor1);
 toilet(-6, 12, FY.F1+0.15, G.floor1);
+
+// ═══════════════════════════════════════════════════
+// GARAGE — 3-car attached, extends right from house
+// ═══════════════════════════════════════════════════
+// Garage spans x=27..57, z=-12..8 (center x=42, z=-2, 30×20)
+const garageFloorY = FY.F1;
+const garageH = 9; // slightly shorter than main house story
+
+// Garage concrete floor
+box(30, 0.3, 20, M.stoneFloor, G.floor1, 42, garageFloorY, -2);
+
+// Garage walls — back wall (z=8)
+wall(42, 8, 30, WT, garageH, garageFloorY, M.brickTrans, G.floor1);
+// Right wall (x=57)
+wall(57, -2, WT, 20, garageH, garageFloorY, M.brickTrans, G.floor1);
+// Front wall segments (z=-12) — with 3 garage door openings
+// Each door is ~8 wide, with 1.5 unit pillars between
+// Layout: |1.5|door 8|1.5|door 8|1.5|door 8|1.5| = 30
+wall(27.75, -12, 1.5, WT, garageH, garageFloorY, M.brickTrans, G.floor1); // far left pillar
+wall(36.5, -12, 1.5, WT, garageH, garageFloorY, M.brickTrans, G.floor1);  // pillar 2
+wall(45.5, -12, 1.5, WT, garageH, garageFloorY, M.brickTrans, G.floor1);  // pillar 3
+wall(56.25, -12, 1.5, WT, garageH, garageFloorY, M.brickTrans, G.floor1); // far right pillar
+// Headers above garage doors
+wall(32.5, -12, 8, WT, 1.5, garageFloorY+garageH-1.5, M.brickTrans, G.floor1);
+wall(41, -12, 8, WT, 1.5, garageFloorY+garageH-1.5, M.brickTrans, G.floor1);
+wall(50.5, -12, 8, WT, 1.5, garageFloorY+garageH-1.5, M.brickTrans, G.floor1);
+
+// Left wall (x=27) — shared with house, only above house wall line, partial wall with door to mudroom
+// Opening to mudroom around z=0
+wall(27, -8, WT, 8, garageH, garageFloorY, M.brickTrans, G.floor1);  // left wall segment z=-12..-4
+wall(27, 5, WT, 6, garageH, garageFloorY, M.brickTrans, G.floor1);   // left wall segment z=2..8
+// Header above mudroom door
+wall(27, -1, WT, 6, 2, garageFloorY+garageH-2, M.brickTrans, G.floor1);
+
+// 3 Garage door panels — dark charcoal with horizontal segment lines
+const garageDoorMat = new THREE.MeshStandardMaterial({color:0x3A3A3A, roughness:0.6, metalness:0.15, transparent:true, opacity:0.7});
+for(let doorIdx=0; doorIdx<3; doorIdx++) {
+  const doorCenterX = 32.5 + doorIdx * 9.5;
+  // Door panel
+  box(8, 7.5, 0.3, garageDoorMat, G.floor1, doorCenterX, garageFloorY+3.75, -12);
+  // Horizontal segment lines (5 segments)
+  for(let seg=0; seg<5; seg++) {
+    box(8, 0.08, 0.35, M.metal, G.floor1, doorCenterX, garageFloorY+0.5+seg*1.5, -12);
+  }
+  // Small window panes at top of each door
+  for(let pane=-2; pane<=2; pane++) {
+    box(1.2, 1, 0.05, M.glass, G.floor1, doorCenterX+pane*1.6, garageFloorY+7, -12.2);
+  }
+}
+
+// Garage roof — flat with slight forward pitch
+const garageRoofGeo = new THREE.BoxGeometry(32, 0.5, 22);
+const garageRoof = new THREE.Mesh(garageRoofGeo, M.roof);
+garageRoof.position.set(42, garageFloorY+garageH, -2);
+garageRoof.rotation.x = 0.03; // very slight pitch forward
+garageRoof.castShadow = true;
+G.floor1.add(garageRoof);
+
+// Garage interior light
+roomLight(42, garageFloorY+8, -2, G.floor1, 0.2, 18, 0xFFFFE0);
+
+// ═══════════════════════════════════════════════════
+// MUDROOM FURNITURE — between garage and kitchen
+// ═══════════════════════════════════════════════════
+// Mudroom is at x=22, z=0, 6×6 (x=19..25, z=-3..3)
+
+// Coat hooks on the wall at z=3 (back wall), row of 5 hooks
+for(let i=-2; i<=2; i++) {
+  // Wall plate
+  box(0.4, 0.4, 0.15, M.metal, G.floor1, 22+i*1, FY.F1+5.5, 2.8);
+  // Hook — angled cylinder sticking out
+  const hook = cyl(0.06, 0.06, 0.8, 6, M.metal, G.floor1, 22+i*1, FY.F1+5.3, 2.4);
+  hook.rotation.x = Math.PI * 0.3; // angle downward
+}
+
+// Storage bench against wall at z=-3 (front wall of mudroom)
+// Bench base — walnut, slightly raised for shoe storage underneath
+box(5, 0.3, 1.8, M.walnut, G.floor1, 22, FY.F1+1.6, -2);   // bench top
+box(5, 0.3, 1.8, M.walnut, G.floor1, 22, FY.F1+0.15, -2);  // bench bottom shelf
+// Bench legs/sides
+box(0.3, 1.3, 1.8, M.walnut, G.floor1, 19.6, FY.F1+0.85, -2); // left side
+box(0.3, 1.3, 1.8, M.walnut, G.floor1, 24.4, FY.F1+0.85, -2); // right side
+// Center divider for shoe cubbies
+box(0.15, 1.3, 1.8, M.walnut, G.floor1, 22, FY.F1+0.85, -2);
+// Cushion on top
+box(4.6, 0.4, 1.5, new THREE.MeshStandardMaterial({color:0x7A6A5A, roughness:0.95}), G.floor1, 22, FY.F1+2, -2);
+// Dark gap underneath to suggest shoe storage
+box(4.4, 0.1, 1.5, new THREE.MeshStandardMaterial({color:0x1A1008, roughness:1}), G.floor1, 22, FY.F1+0.35, -2);
 
 // ═══════════════════════════════════════════════════
 // FLOOR 2
@@ -1263,12 +1351,12 @@ for(let i=0; i<8; i++) {
   box(4, 0.15, 1.5, M.stone, G.outdoor, 0, FY.F1-0.1, -D/2-9-i*3);
 }
 
-// Driveway
-const driveGeo = new THREE.PlaneGeometry(14, 25);
+// Driveway — wide enough for 3-car garage, extends from garage doors to street
+const driveGeo = new THREE.PlaneGeometry(32, 30);
 const driveMat = new THREE.MeshStandardMaterial({color:0x6A6058,roughness:0.9});
 const driveMesh = new THREE.Mesh(driveGeo, driveMat);
 driveMesh.rotation.x = -Math.PI/2;
-driveMesh.position.set(22, FY.F1-0.05, D/2+12);
+driveMesh.position.set(42, FY.F1-0.05, -D/2-12);
 driveMesh.receiveShadow = true;
 G.outdoor.add(driveMesh);
 
@@ -1332,6 +1420,8 @@ label('🛋 Living', new THREE.Vector3(-16,FY.F1+8,-8), 'floor1');
 label('🍳 Kitchen', new THREE.Vector3(14,FY.F1+6,-8), 'floor1');
 label('🍽 Dining', new THREE.Vector3(14,FY.F1+6,12), 'floor1');
 label('📚 Office', new THREE.Vector3(-16,FY.F1+6,8), 'floor1');
+label('🚗 Garage', new THREE.Vector3(42,FY.F1+6,-2), 'floor1');
+label('🧥 Mudroom', new THREE.Vector3(22,FY.F1+6,0), 'floor1');
 label('🛏 Bed 1', new THREE.Vector3(-14,FY.F2+6,-11), 'floor2');
 label('🛏 Bed 2', new THREE.Vector3(-14,FY.F2+6,5), 'floor2');
 label('👕 Laundry', new THREE.Vector3(8,FY.F2+6,11), 'floor2');
