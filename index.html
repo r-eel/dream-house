@@ -1258,19 +1258,9 @@ for(let angle=0; angle<Math.PI*2; angle+=Math.PI/3) {
   adirondackChair(cx, cz, FY.F1, G.outdoor, -angle + Math.PI);
 }
 
-// Garden path with stepping stones from back door to fire pit
+// Stone pathway from front entrance to street
 for(let i=0; i<8; i++) {
-  box(4, 0.15, 1.5, M.stone, G.outdoor, 0, FY.F1-0.1, D/2+4+i*3);
-}
-// Stepping stones branching to fire pit
-for(let i=0; i<6; i++) {
-  const t = i/5;
-  const sx = -t*8;
-  const sz = D/2+22 + t*6;
-  const stoneR = 0.6+Math.random()*0.3;
-  cyl(stoneR, stoneR, 0.12, 8,
-    new THREE.MeshStandardMaterial({color:0x8A8070+Math.floor(Math.random()*0x101010),roughness:0.9}),
-    G.outdoor, sx, FY.F1-0.05, sz);
+  box(4, 0.15, 1.5, M.stone, G.outdoor, 0, FY.F1-0.1, -D/2-9-i*3);
 }
 
 // Driveway
