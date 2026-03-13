@@ -514,12 +514,13 @@ function bed(x,z,y,w,d,group,mat=M.bedding) {
 }
 
 function couch(x,z,y,group) {
+  // U-shaped couch — open side faces +z (toward fireplace)
   box(14, 2, 4, M.couchFabric, group, x, y+1, z);
-  box(4, 2, 6, M.couchFabric, group, x-6, y+1, z+1);
-  box(4, 2, 6, M.couchFabric, group, x+6, y+1, z+1);
-  box(14, 1.5, 0.8, M.couchFabric, group, x, y+2.2, z+1.8);
-  box(4, 1.5, 0.8, M.couchFabric, group, x-6, y+2.2, z+3.5);
-  box(4, 1.5, 0.8, M.couchFabric, group, x+6, y+2.2, z+3.5);
+  box(4, 2, 6, M.couchFabric, group, x-6, y+1, z-1);
+  box(4, 2, 6, M.couchFabric, group, x+6, y+1, z-1);
+  box(14, 1.5, 0.8, M.couchFabric, group, x, y+2.2, z-1.8);
+  box(4, 1.5, 0.8, M.couchFabric, group, x-6, y+2.2, z-3.5);
+  box(4, 1.5, 0.8, M.couchFabric, group, x+6, y+2.2, z-3.5);
   box(1.2,1.2,1, new THREE.MeshStandardMaterial({color:0xA0522D,roughness:0.9}), group, x-5,y+2.5,z);
   box(1.2,1.2,1, new THREE.MeshStandardMaterial({color:0x8B7355,roughness:0.9}), group, x+5,y+2.5,z);
 }
@@ -540,10 +541,47 @@ function diningTable(x,z,y,group) {
 function kitchenIsland(x,z,y,group) {
   box(8, 3, 3, M.cabinet, group, x, y+1.5, z);
   box(8.2, 0.4, 3.2, M.counter, group, x, y+3.1, z);
+  // Barstools on north side (toward living area)
   for(let i=-1; i<=1; i++) {
-    cyl(0.5,0.5,0.3,8, M.walnut, group, x+i*2.5, y+2, z-2.2);
-    cyl(0.15,0.15,2,8, M.metal, group, x+i*2.5, y+1, z-2.2);
+    cyl(0.5,0.5,0.3,8, M.walnut, group, x+i*2.5, y+2, z+2.2);
+    cyl(0.15,0.15,2,8, M.metal, group, x+i*2.5, y+1, z+2.2);
   }
+}
+
+function adirondackChair(x, z, y, group, angle) {
+  const g = new THREE.Group();
+  // Seat
+  box(2.2, 0.2, 2, M.walnut, g, 0, 1.2, 0);
+  // Back
+  box(2.2, 2.2, 0.2, M.walnut, g, 0, 2.5, -0.9);
+  // Legs
+  for(let lx of [-0.9, 0.9]) for(let lz of [-0.7, 0.7])
+    cyl(0.1, 0.1, 1.1, 6, M.walnut, g, lx, 0.55, lz);
+  // Armrests
+  box(0.2, 0.15, 2, M.walnut, g, -1.1, 1.5, 0);
+  box(0.2, 0.15, 2, M.walnut, g, 1.1, 1.5, 0);
+  g.position.set(x, y, z);
+  g.rotation.y = angle;
+  group.add(g);
+}
+
+function nightstand(x, z, y, group) {
+  box(1.2, 2, 1.2, M.walnut, group, x, y+1, z);
+  // Lamp base
+  cyl(0.2, 0.25, 0.8, 8, M.metal, group, x, y+2.4, z);
+  // Lamp shade
+  cyl(0.5, 0.3, 0.6, 8, M.cream, group, x, y+3, z);
+}
+
+function diningChair(x, z, y, group, angle) {
+  const g = new THREE.Group();
+  box(1.4, 0.2, 1.4, M.walnut, g, 0, 1.5, 0);
+  box(1.4, 2, 0.2, M.walnut, g, 0, 2.5, -0.6);
+  for(let lx of [-0.55, 0.55]) for(let lz of [-0.55, 0.55])
+    cyl(0.08, 0.08, 1.4, 6, M.walnut, g, lx, 0.7, lz);
+  g.position.set(x, y, z);
+  g.rotation.y = angle;
+  group.add(g);
 }
 
 function bathtub(x,z,y,group) {
@@ -674,6 +712,9 @@ roomLight(-12, FY.B+8, -4, G.basement, 0.4, 15);
 roomLight(16, FY.B+8, -4, G.basement, 0.3, 12, 0xFFD090);
 roomLight(0, FY.B+8, 12, G.basement, 0.3, 12);
 
+// Theatre ceiling — dark enclosed feel
+box(24, 0.3, 17, new THREE.MeshStandardMaterial({color:0x1A1018,roughness:1}), G.basement, -12, FY.B+SH-0.15, -4);
+
 // Theatre seating
 for(let row=0; row<3; row++) {
   box(18, 0.4, 3, M.darkFabric, G.basement, -12, FY.B+1+row*1.2, -10+row*4);
@@ -697,8 +738,8 @@ for(let i=-2; i<=2; i++) {
 box(W, 0.3, D, M.walnutFloor, G.floor1, 0, FY.F1, 0);
 
 // V3: Interior walls with arched doorways
-// Foyer to living room
-wallWithDoor(-8, -10, 16, WT, SH, FY.F1, M.creamWall, G.floor1, 0, 4);
+// Foyer to living room (shortened to clear staircase at x=0)
+wallWithDoor(-10, -10, 12, WT, SH, FY.F1, M.creamWall, G.floor1, 0, 4);
 // Living room to kitchen (partial wall)
 wallWithDoor(0, 0, D-16, WT, SH, FY.F1, M.creamWall, G.floor1, 0, 4);
 // Kitchen east wall
@@ -737,8 +778,8 @@ roomLight(14, FY.F1+8, 6, G.floor1, 0.35, 12, 0xFFE8B0); // Dining
 roomLight(-16, FY.F1+8, 8, G.floor1, 0.3, 12, 0xFFE0A0); // Office
 roomLight(0, FY.F1+8, -14, G.floor1, 0.3, 10, 0xFFE8C0); // Foyer
 
-// V3: Exposed ceiling beams — Living Room & Dining
-for(let i=-2; i<=1; i++) {
+// V3: Exposed ceiling beams — Living Room & Dining (within house footprint)
+for(let i=-1; i<=1; i++) {
   // Living room beams
   box(14, 0.5, 0.7, M.walnut, G.floor1, -16, FY.F1+SH-0.5, -8+i*5);
   // Bevel detail
@@ -766,6 +807,18 @@ kitchenIsland(14, -10, FY.F1+0.15, G.floor1);
 box(8, 3, 1.5, M.cabinet, G.floor1, 14, FY.F1+1.5, -D/2+1.5);
 box(8.2, 0.3, 1.7, M.counter, G.floor1, 14, FY.F1+3.1, -D/2+1.5);
 box(8, 2.5, 1, M.cabinet, G.floor1, 14, FY.F1+7, -D/2+1);
+
+// Stove/range
+box(3, 3, 2, M.metal, G.floor1, 19, FY.F1+1.5, -D/2+1.5);
+box(3.1, 0.1, 2.1, new THREE.MeshStandardMaterial({color:0x333333,roughness:0.3,metalness:0.7}), G.floor1, 19, FY.F1+3.05, -D/2+1.5);
+// Burners
+for(let bx of [-0.6, 0.6]) for(let bz of [-0.4, 0.4])
+  cyl(0.35, 0.35, 0.08, 12, new THREE.MeshStandardMaterial({color:0x222222,roughness:0.4,metalness:0.6}), G.floor1, 19+bx, FY.F1+3.12, -D/2+1.5+bz);
+
+// Refrigerator
+box(2.5, 6.5, 2, new THREE.MeshStandardMaterial({color:0xE8E8E8,roughness:0.3,metalness:0.15}), G.floor1, 22, FY.F1+3.25, -D/2+1.5);
+// Fridge handle
+box(0.1, 2.5, 0.15, M.metal, G.floor1, 20.8, FY.F1+4.5, -D/2+0.4);
 
 // Dining Room
 diningTable(14, 7, FY.F1+0.15, G.floor1);
@@ -812,9 +865,13 @@ roomFloor(8, 3, 8, 6, FY.F2+0.2, M.floorBath, 'Half Bath',
 roomFloor(8, 11, 10, 8, FY.F2+0.2, M.floorUtility, 'Laundry Room',
   'Washer, dryer, folding station 👕', G.floor2, 'floor2');
 
-// Beds
+// Beds with nightstands
 bed(-14, -11, FY.F2+0.15, 6, 7, G.floor2);
+nightstand(-18, -8.5, FY.F2+0.15, G.floor2);
+nightstand(-10, -8.5, FY.F2+0.15, G.floor2);
 bed(-14, 6, FY.F2+0.15, 6, 7, G.floor2);
+nightstand(-18, 8.5, FY.F2+0.15, G.floor2);
+nightstand(-10, 8.5, FY.F2+0.15, G.floor2);
 
 // Bathroom
 vanity(6, -10, FY.F2+0.15, 4, G.floor2);
@@ -868,17 +925,28 @@ for(let i=-1; i<=1; i++) {
   box(14, 0.5, 0.6, M.walnut, G.floor3, -16, FY.F3+SH+1.5, 10+i*3);
 }
 
-// Master bed (king)
+// Master bed (king) with nightstands
 bed(6, -6, FY.F3+0.15, 8, 8, G.floor3, M.masterBedding);
+nightstand(1, -3, FY.F3+0.15, G.floor3);
+nightstand(11, -3, FY.F3+0.15, G.floor3);
 
 // Master bathroom
 vanity(16, 14, FY.F3+0.15, 6, G.floor3);
 bathtub(12, 10, FY.F3+0.15, G.floor3);
 shower(18, 8, FY.F3+0.15, 4, 5, G.floor3);
+// Towel bars near vanity
+cyl(0.08, 0.08, 3, 8, M.metal, G.floor3, 19.5, FY.F3+4, 14);
+cyl(0.08, 0.08, 3, 8, M.metal, G.floor3, 19.5, FY.F3+4.5, 14);
+// Bathroom rug in front of vanity
+box(4, 0.1, 2, new THREE.MeshStandardMaterial({color:0x4A3A30,roughness:1}), G.floor3, 16, FY.F3+0.2, 12);
 
-// Beds 3 & 4
+// Beds 3 & 4 with nightstands
 bed(-16, -6, FY.F3+0.15, 5, 6, G.floor3);
+nightstand(-19.5, -4, FY.F3+0.15, G.floor3);
+nightstand(-12.5, -4, FY.F3+0.15, G.floor3);
 bed(-16, 10, FY.F3+0.15, 5, 6, G.floor3);
+nightstand(-19.5, 12, FY.F3+0.15, G.floor3);
+nightstand(-12.5, 12, FY.F3+0.15, G.floor3);
 
 // Closet rods/shelves
 box(8, 0.15, 1.5, M.metal, G.floor3, 6, FY.F3+6, 11);
@@ -1008,10 +1076,12 @@ G.outdoor.add(ground);
 roomFloor(-8, -D/2-12, 20, 10, FY.F1-0.1, M.patio, 'Patio',
   'Outdoor entertaining — grill, seating area, umbrellas 🪑', G.outdoor, 'outdoor');
 
-// Patio furniture
+// Patio furniture — table + proper chairs
 box(6, 2, 6, M.oak, G.outdoor, -8, FY.F1+1, -D/2-14);
-for(let dx of [-4, 4]) for(let dz of [-4, 4])
-  box(2, 0.3, 2, M.couchFabric, G.outdoor, -8+dx, FY.F1+1.2, -D/2-14+dz);
+for(let dx of [-4, 4]) for(let dz of [-4, 4]) {
+  const chairAngle = Math.atan2(-dz, -dx);
+  diningChair(-8+dx, -D/2-14+dz, FY.F1, G.outdoor, chairAngle);
+}
 // Umbrella
 cyl(0.15,0.15,6,8, M.metal, G.outdoor, -8, FY.F1+4, -D/2-14);
 const umbMesh = new THREE.Mesh(new THREE.ConeGeometry(4, 1.5, 8, 1, true),
@@ -1053,12 +1123,10 @@ const fireLight = new THREE.PointLight(0xff6622, 1, 20);
 fireLight.position.set(-8, FY.F1+3, -D/2-26);
 G.outdoor.add(fireLight);
 
-// Adirondack chairs
+// Adirondack chairs around fire pit
 for(let angle=0; angle<Math.PI*2; angle+=Math.PI/3) {
-  const cx=-8+Math.cos(angle)*6, cz=-D/2-26+Math.sin(angle)*6;
-  const chair = box(2.5,2,2, M.walnut, G.outdoor, cx, FY.F1+1, cz);
-  chair.rotation.y = -angle + Math.PI;
-  box(2.5,2.5,0.3, M.walnut, G.outdoor, cx, FY.F1+2, cz+Math.cos(angle)*0.8);
+  const cx=-8+Math.cos(angle)*6.5, cz=-D/2-26+Math.sin(angle)*6.5;
+  adirondackChair(cx, cz, FY.F1, G.outdoor, -angle + Math.PI);
 }
 
 // V3: Garden path with stepping stones from walkway to fire pit
