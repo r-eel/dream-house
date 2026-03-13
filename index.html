@@ -348,12 +348,12 @@ function stoneTexture(w=256, h=256) {
 // ═══════════════════════════════════════════════════
 const M = {
   brick: new THREE.MeshStandardMaterial({ map: brickTexture(), roughness: 0.85, metalness: 0 }),
-  brickTrans: new THREE.MeshStandardMaterial({ map: brickTexture(), roughness: 0.85, transparent: true, opacity: 0.25 }),
+  brickTrans: new THREE.MeshStandardMaterial({ map: brickTexture(), roughness: 0.85, transparent: true, opacity: 0.18, depthWrite: false }),
   walnut: new THREE.MeshStandardMaterial({ map: woodTexture(256,256,'#5C3A1E'), roughness: 0.6, metalness: 0.05 }),
   walnutFloor: new THREE.MeshStandardMaterial({ map: walnutFloorTexture(), roughness: 0.5, metalness: 0.05 }),
   oak: new THREE.MeshStandardMaterial({ map: woodTexture(256,256,'#8B7355'), roughness: 0.55, metalness: 0.05 }),
   cream: new THREE.MeshStandardMaterial({ color: 0xF0E6D6, roughness: 0.9 }),
-  creamWall: new THREE.MeshStandardMaterial({ color: 0xEDE4D4, roughness: 0.85 }),
+  creamWall: new THREE.MeshStandardMaterial({ color: 0xEDE4D4, roughness: 0.85, transparent: true, opacity: 0.45, depthWrite: false }),
   stone: new THREE.MeshStandardMaterial({ map: stoneTexture(), roughness: 0.8 }),
   stoneFloor: new THREE.MeshStandardMaterial({ color: 0x7A7060, roughness: 0.8 }),
   roof: new THREE.MeshStandardMaterial({ map: roofTexture(), roughness: 0.85 }),
