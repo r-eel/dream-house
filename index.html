@@ -1045,29 +1045,83 @@ const archMesh = new THREE.Mesh(archGeo, M.stone);
 archMesh.position.set(0, FY.F1+9, -D/2);
 G.structure.add(archMesh);
 
-// V3: Multi-colored stained glass
+// V4: Elegant Victorian stained glass rose window
 const sgGroup = new THREE.Group();
 sgGroup.position.set(0, FY.F1+11, -D/2+0.3);
 G.structure.add(sgGroup);
-// Center circle
-const sgCenter = new THREE.Mesh(new THREE.CircleGeometry(0.6, 16),
-  new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xFFAA00,emissiveIntensity:0.4,transparent:true,opacity:0.6}));
-sgGroup.add(sgCenter);
-// Colored segments around
-const sgColors = [0x228B22, 0xDDAA00, 0xCC2222, 0x228B22, 0x2266AA, 0xDDAA00, 0xCC2222, 0x228B22];
-for(let i=0; i<8; i++) {
-  const angle = (i/8)*Math.PI*2;
-  const segGeo = new THREE.CircleGeometry(2, 16, angle, Math.PI/4);
-  const segMat = new THREE.MeshStandardMaterial({
-    color: sgColors[i], emissive: sgColors[i], emissiveIntensity: 0.3,
-    transparent: true, opacity: 0.5, side: THREE.DoubleSide
-  });
-  const seg = new THREE.Mesh(segGeo, segMat);
-  sgGroup.add(seg);
+const leadMat = new THREE.MeshStandardMaterial({color:0x2A2A2A, roughness:0.4, metalness:0.7});
+const sgR = 2.2; // main radius
+
+// Outer frame ring
+const outerRing = new THREE.Mesh(new THREE.RingGeometry(sgR-0.12, sgR+0.12, 32), leadMat);
+sgGroup.add(outerRing);
+
+// Inner decorative ring
+const innerRing = new THREE.Mesh(new THREE.RingGeometry(sgR*0.48-0.06, sgR*0.48+0.06, 24), leadMat);
+sgGroup.add(innerRing);
+
+// Jewel tone colors: emerald, amber, ruby, sapphire
+const jewelColors = [
+  {color:0x0B6623, emissive:0x0A4A1A}, // deep emerald
+  {color:0xC89A2C, emissive:0x8A6A10}, // amber/gold
+  {color:0x9B111E, emissive:0x6A0A12}, // ruby red
+  {color:0x1A3A6A, emissive:0x0A2040}, // sapphire blue
+  {color:0x0B6623, emissive:0x0A4A1A}, // emerald
+  {color:0xC89A2C, emissive:0x8A6A10}, // amber
+];
+
+// Center rosette — 6-petal flower
+const centerR = sgR * 0.22;
+const centerGeo = new THREE.CircleGeometry(centerR, 6);
+const centerMat = new THREE.MeshStandardMaterial({color:0xC89A2C,emissive:0xAA7A10,emissiveIntensity:0.35,transparent:true,opacity:0.6});
+sgGroup.add(new THREE.Mesh(centerGeo, centerMat));
+// Petals around center
+for(let i=0; i<6; i++) {
+  const a = (i/6)*Math.PI*2;
+  const px = Math.cos(a)*centerR*1.6, py = Math.sin(a)*centerR*1.6;
+  const petal = new THREE.Mesh(new THREE.CircleGeometry(centerR*0.8, 8),
+    new THREE.MeshStandardMaterial({color:0x9B111E,emissive:0x6A0A12,emissiveIntensity:0.25,transparent:true,opacity:0.55,side:THREE.DoubleSide}));
+  petal.position.set(px, py, 0);
+  sgGroup.add(petal);
 }
-// Stained glass glow
-const sgLight = new THREE.PointLight(0xFFDD88, 0.4, 8);
-sgLight.position.set(0, FY.F1+11, -D/2+1);
+
+// 6 radial lead lines (spokes)
+for(let i=0; i<6; i++) {
+  const a = (i/6)*Math.PI*2;
+  const spoke = new THREE.Mesh(new THREE.PlaneGeometry(0.08, sgR), leadMat);
+  spoke.rotation.z = a;
+  spoke.position.set(Math.cos(a)*sgR/2, Math.sin(a)*sgR/2, 0.01);
+  sgGroup.add(spoke);
+}
+
+// Inner petal panes (between inner ring and center) — 6 segments
+for(let i=0; i<6; i++) {
+  const a0 = (i/6)*Math.PI*2 + Math.PI/6;
+  const a1 = ((i+1)/6)*Math.PI*2 + Math.PI/6;
+  const jc = jewelColors[i];
+  const paneGeo = new THREE.RingGeometry(centerR*2.2, sgR*0.48-0.08, 12, 1, a0, (a1-a0));
+  const paneMat = new THREE.MeshStandardMaterial({color:jc.color, emissive:jc.emissive, emissiveIntensity:0.2, transparent:true, opacity:0.5, side:THREE.DoubleSide});
+  sgGroup.add(new THREE.Mesh(paneGeo, paneMat));
+}
+
+// Outer panes (between inner ring and outer ring) — 12 segments for more detail
+const outerJewels = [0x0B6623, 0xC89A2C, 0x9B111E, 0x1A3A6A, 0x0B6623, 0xC89A2C, 0x9B111E, 0x1A3A6A, 0x0B6623, 0xC89A2C, 0x9B111E, 0x1A3A6A];
+for(let i=0; i<12; i++) {
+  const a0 = (i/12)*Math.PI*2;
+  const paneGeo = new THREE.RingGeometry(sgR*0.48+0.08, sgR-0.14, 12, 1, a0, Math.PI/6);
+  const paneMat = new THREE.MeshStandardMaterial({color:outerJewels[i], emissive:outerJewels[i], emissiveIntensity:0.15, transparent:true, opacity:0.45, side:THREE.DoubleSide});
+  sgGroup.add(new THREE.Mesh(paneGeo, paneMat));
+  // Additional lead divider for each outer pane
+  const la = a0 + Math.PI/12;
+  const leadLine = new THREE.Mesh(new THREE.PlaneGeometry(0.05, sgR*0.5), leadMat);
+  leadLine.rotation.z = la;
+  leadLine.position.set(Math.cos(la)*sgR*0.73, Math.sin(la)*sgR*0.73, 0.01);
+  sgGroup.add(leadLine);
+}
+
+// Subtle warm glow behind the window
+const sgLight = new THREE.PointLight(0xFFDD88, 0.3, 6);
+sgLight.position.set(0, FY.F1+11, -D/2+1.5);
 G.structure.add(sgLight);
 
 // V3: Welcome mat
@@ -1110,72 +1164,97 @@ ground.position.y = FY.F1-0.2;
 ground.receiveShadow = true;
 G.outdoor.add(ground);
 
-// Patio
-roomFloor(-8, -D/2-12, 20, 10, FY.F1-0.1, M.patio, 'Patio',
+// Patio — BACKYARD (+Z side)
+roomFloor(-8, D/2+12, 20, 10, FY.F1-0.1, M.patio, 'Patio',
   'Outdoor entertaining — grill, seating area, umbrellas 🪑', G.outdoor, 'outdoor');
 
-// Patio furniture — table + proper chairs
-box(6, 2, 6, M.oak, G.outdoor, -8, FY.F1+1, -D/2-14);
+// Patio furniture — table + proper chairs (backyard)
+box(6, 2, 6, M.oak, G.outdoor, -8, FY.F1+1, D/2+14);
 for(let dx of [-4, 4]) for(let dz of [-4, 4]) {
   const chairAngle = Math.atan2(-dz, -dx);
-  diningChair(-8+dx, -D/2-14+dz, FY.F1, G.outdoor, chairAngle);
+  diningChair(-8+dx, D/2+14+dz, FY.F1, G.outdoor, chairAngle);
 }
 // Umbrella
-cyl(0.15,0.15,6,8, M.metal, G.outdoor, -8, FY.F1+4, -D/2-14);
+cyl(0.15,0.15,6,8, M.metal, G.outdoor, -8, FY.F1+4, D/2+14);
 const umbMesh = new THREE.Mesh(new THREE.ConeGeometry(4, 1.5, 8, 1, true),
   new THREE.MeshStandardMaterial({color:0xCC8844,roughness:0.9,side:THREE.DoubleSide}));
-umbMesh.position.set(-8, FY.F1+7, -D/2-14);
+umbMesh.position.set(-8, FY.F1+7, D/2+14);
 G.outdoor.add(umbMesh);
 
-// V3: String lights on patio
-for(let i=0; i<10; i++) {
-  const lx = -16 + i * 3.5;
-  const ly = FY.F1+6.5 + Math.sin(i*0.8)*0.3;
-  const lz = -D/2-10;
-  // Bulb
-  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.12, 6, 6),
-    new THREE.MeshStandardMaterial({color:0xFFDD88,emissive:0xFFCC66,emissiveIntensity:0.8}));
-  bulb.position.set(lx, ly, lz);
-  G.outdoor.add(bulb);
-  // Wire segment
-  if(i>0) {
-    const wire = box(3.5, 0.03, 0.03, M.metal, G.outdoor, lx-1.75, ly+0.15, lz);
-  }
-  // Small point light every 3rd bulb
-  if(i%3===0) {
-    const sl = new THREE.PointLight(0xFFDD88, 0.15, 5);
-    sl.position.set(lx, ly, lz);
-    G.outdoor.add(sl);
+// V4: Triangle string lights — two house wall points to a backyard tree
+// Tree anchor point in backyard
+tree(-8, D/2+30, FY.F1, G.outdoor, 1.3);
+const triPts = [
+  {x: -14, y: FY.F1+9, z: D/2},   // Left wall attach
+  {x: -2,  y: FY.F1+9, z: D/2},    // Right wall attach
+  {x: -8,  y: FY.F1+8, z: D/2+30}, // Tree attach
+];
+const bulbMat = new THREE.MeshStandardMaterial({color:0xFFDD88,emissive:0xFFCC66,emissiveIntensity:0.8});
+// Draw 3 catenary lines forming a triangle
+for(let edge=0; edge<3; edge++) {
+  const p0 = triPts[edge], p1 = triPts[(edge+1)%3];
+  const segCount = 14;
+  const dist = Math.sqrt((p1.x-p0.x)**2 + (p1.z-p0.z)**2);
+  const sag = dist * 0.06; // catenary droop
+  for(let i=0; i<=segCount; i++) {
+    const t = i/segCount;
+    const lx = p0.x + (p1.x-p0.x)*t;
+    const lz = p0.z + (p1.z-p0.z)*t;
+    const ly = p0.y + (p1.y-p0.y)*t - sag*Math.sin(t*Math.PI);
+    // Bulb
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.12, 6, 6), bulbMat);
+    bulb.position.set(lx, ly, lz);
+    G.outdoor.add(bulb);
+    // Wire to next bulb
+    if(i < segCount) {
+      const nt = (i+1)/segCount;
+      const nx = p0.x + (p1.x-p0.x)*nt;
+      const nz = p0.z + (p1.z-p0.z)*nt;
+      const ny = p0.y + (p1.y-p0.y)*nt - sag*Math.sin(nt*Math.PI);
+      const mx = (lx+nx)/2, my = (ly+ny)/2, mz = (lz+nz)/2;
+      const wLen = Math.sqrt((nx-lx)**2+(ny-ly)**2+(nz-lz)**2);
+      const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,wLen,4), M.metal);
+      wire.position.set(mx, my, mz);
+      wire.lookAt(nx, ny, nz);
+      wire.rotateX(Math.PI/2);
+      G.outdoor.add(wire);
+    }
+    // Point light every few bulbs
+    if(i%4===0) {
+      const sl = new THREE.PointLight(0xFFDD88, 0.12, 6);
+      sl.position.set(lx, ly, lz);
+      G.outdoor.add(sl);
+    }
   }
 }
 
-// Grill
-box(3, 3, 2, M.metal, G.outdoor, 4, FY.F1+1.5, -D/2-12);
+// Grill (backyard)
+box(3, 3, 2, M.metal, G.outdoor, 4, FY.F1+1.5, D/2+12);
 
-// Fire pit
-const fp = cyl(3.5, 4, 1.5, 16, M.stone, G.outdoor, -8, FY.F1+0.75, -D/2-26);
+// Fire pit (backyard)
+const fp = cyl(3.5, 4, 1.5, 16, M.stone, G.outdoor, -8, FY.F1+0.75, D/2+26);
 rooms.push({ name:'Fire Pit', desc:'Gather around — s\'mores, stargazing, and good conversations 🔥',
   mesh: fp, material: M.stone, line: null, floor:'outdoor' });
-cyl(2.5, 2.5, 0.5, 16, M.fire, G.outdoor, -8, FY.F1+1.5, -D/2-26);
+cyl(2.5, 2.5, 0.5, 16, M.fire, G.outdoor, -8, FY.F1+1.5, D/2+26);
 const fireLight = new THREE.PointLight(0xff6622, 1, 20);
-fireLight.position.set(-8, FY.F1+3, -D/2-26);
+fireLight.position.set(-8, FY.F1+3, D/2+26);
 G.outdoor.add(fireLight);
 
-// Adirondack chairs around fire pit
+// Adirondack chairs around fire pit (backyard)
 for(let angle=0; angle<Math.PI*2; angle+=Math.PI/3) {
-  const cx=-8+Math.cos(angle)*6.5, cz=-D/2-26+Math.sin(angle)*6.5;
+  const cx=-8+Math.cos(angle)*6.5, cz=D/2+26+Math.sin(angle)*6.5;
   adirondackChair(cx, cz, FY.F1, G.outdoor, -angle + Math.PI);
 }
 
-// V3: Garden path with stepping stones from walkway to fire pit
+// Garden path with stepping stones from back door to fire pit
 for(let i=0; i<8; i++) {
-  box(4, 0.15, 1.5, M.stone, G.outdoor, 0, FY.F1-0.1, -D/2-10-i*3);
+  box(4, 0.15, 1.5, M.stone, G.outdoor, 0, FY.F1-0.1, D/2+4+i*3);
 }
 // Stepping stones branching to fire pit
 for(let i=0; i<6; i++) {
   const t = i/5;
   const sx = -t*8;
-  const sz = -D/2-28 + (1-t)*6;
+  const sz = D/2+22 + t*6;
   const stoneR = 0.6+Math.random()*0.3;
   cyl(stoneR, stoneR, 0.12, 8,
     new THREE.MeshStandardMaterial({color:0x8A8070+Math.floor(Math.random()*0x101010),roughness:0.9}),
@@ -1210,10 +1289,10 @@ tree(-20, -42, FY.F1, G.outdoor, 0.5); // Small
 tree(15, -45, FY.F1, G.outdoor, 1.5); // Large
 pineTree(-45, -10, FY.F1, G.outdoor, 1.4);
 
-// Bushes around house
+// Bushes around house (skip front door area x=-4..4)
 for(let i=-20; i<=20; i+=5) {
   const bMat = new THREE.MeshStandardMaterial({color:new THREE.Color(0.12+Math.random()*0.08, 0.28+Math.random()*0.12, 0.06+Math.random()*0.04),roughness:0.9});
-  cyl(1.5, 1.5, 2, 8, bMat, G.outdoor, i, FY.F1+1, -D/2-2.5);
+  if(i < -4 || i > 4) cyl(1.5, 1.5, 2, 8, bMat, G.outdoor, i, FY.F1+1, -D/2-2.5);
   if(Math.abs(i)<18) cyl(1.5, 1.5, 2, 8, bMat, G.outdoor, i, FY.F1+1, D/2+2.5);
 }
 
@@ -1258,8 +1337,8 @@ label('👑 Master', new THREE.Vector3(6,FY.F3+7,-4), 'floor3');
 label('👗 Closet', new THREE.Vector3(6,FY.F3+6,11), 'floor3');
 label('🛁 Bath', new THREE.Vector3(16,FY.F3+6,11), 'floor3');
 label('♨️ Hot Tub', new THREE.Vector3(22,FY.F3+4,-10), 'floor3');
-label('🔥 Fire Pit', new THREE.Vector3(-8,FY.F1+4,-D/2-26), 'outdoor');
-label('🪑 Patio', new THREE.Vector3(-8,FY.F1+4,-D/2-12), 'outdoor');
+label('🔥 Fire Pit', new THREE.Vector3(-8,FY.F1+4,D/2+26), 'outdoor');
+label('🪑 Patio', new THREE.Vector3(-8,FY.F1+4,D/2+12), 'outdoor');
 
 // ═══════════════════════════════════════════════════
 // INTERACTION
