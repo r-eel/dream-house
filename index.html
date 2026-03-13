@@ -438,15 +438,19 @@ function wall(x,z,w,d,h,y,mat,group) { return box(w,h,d,mat,group,x,y+h/2,z); }
 function addWindow(x,y,z,w,h,group,rotY=0) {
   const fmat = M.walnut;
   const bt = 0.25; // bar thickness
-  // Outer frame - 4 thin bars
-  const top = box(w+bt*2, bt, bt, fmat, group, x, y+h/2, z); if(rotY) top.rotation.y=rotY;
-  const bot = box(w+bt*2, bt, bt, fmat, group, x, y-h/2, z); if(rotY) bot.rotation.y=rotY;
-  const lft = box(bt, h, bt, fmat, group, x-w/2, y, z); if(rotY) lft.rotation.y=rotY;
-  const rgt = box(bt, h, bt, fmat, group, x+w/2, y, z); if(rotY) rgt.rotation.y=rotY;
+  const wg = new THREE.Group();
+  wg.position.set(x, y, z);
+  wg.rotation.y = rotY;
+  group.add(wg);
+  // Outer frame - 4 thin bars (local coords relative to group center)
+  box(w+bt*2, bt, bt, fmat, wg, 0, h/2, 0);
+  box(w+bt*2, bt, bt, fmat, wg, 0, -h/2, 0);
+  box(bt, h, bt, fmat, wg, -w/2, 0, 0);
+  box(bt, h, bt, fmat, wg, w/2, 0, 0);
   // Glass pane
   const glassMat = new THREE.MeshStandardMaterial({ color:0xAAD4EE, roughness:0.05, metalness:0.1, transparent:true, opacity:0.28, depthWrite:false, side:THREE.DoubleSide });
-  const gp = box(w-bt, h-bt, 0.06, glassMat, group, x, y, z); if(rotY) gp.rotation.y=rotY;
-  return top;
+  box(w-bt, h-bt, 0.06, glassMat, wg, 0, 0, 0);
+  return wg;
 }
 
 // V3: Arched doorway helper
@@ -1153,6 +1157,14 @@ for(let z of [-10, 0, 10]) {
   addWindow(W/2-0.1, FY.F1+5.5, z, 3.5, 5, G.structure, Math.PI/2);
   addWindow(-W/2+0.1, FY.F2+5.5, z, 3, 4.5, G.structure, Math.PI/2);
   addWindow(W/2-0.1, FY.F2+5.5, z, 3, 4.5, G.structure, Math.PI/2);
+}
+// Windows — back wall (z=D/2), kitchen sink window at x=14
+for(let x of [-18, -10, 10, 14, 18]) {
+  addWindow(x, FY.F1+5.5, D/2-0.1, x===14 ? 4.5 : 3.5, x===14 ? 6 : 5, G.structure, Math.PI);
+}
+for(let x of [-18, -10, 10, 18]) {
+  addWindow(x, FY.F2+5.5, D/2-0.1, 3, 4.5, G.structure, Math.PI);
+  addWindow(x, FY.F3+5.5, D/2-0.1, 3, 4.5, G.structure, Math.PI);
 }
 
 // ═══════════════════════════════════════════════════
