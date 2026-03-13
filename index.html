@@ -755,10 +755,10 @@ wall(-1, 14, 6, WT, SH, FY.F1, M.creamWall, G.floor1);
 // Room floors
 roomFloor(0, -14, 12, 8, FY.F1+0.2, M.floorLiving, 'Grand Foyer',
   'Double doors, soaring ceiling with staircase — the first thing you see 🚪', G.floor1, 'floor1');
-roomFloor(-16, -8, 14, 16, FY.F1+0.2, M.floorLiving, 'Living Room',
-  'High ceilings, stone fireplace, drop-down projector, huge U-shaped couch 🛋', G.floor1, 'floor1');
-roomFloor(14, -8, 10, 12, FY.F1+0.2, M.floorKitchen, 'Kitchen',
+roomFloor(-16, -8, 14, 16, FY.F1+0.2, M.floorKitchen, 'Kitchen',
   'Warm walnut cabinets, stone countertops, island with stools 🍳', G.floor1, 'floor1');
+roomFloor(14, -8, 10, 12, FY.F1+0.2, M.floorLiving, 'Living Room',
+  'High ceilings, stone fireplace, drop-down projector, huge U-shaped couch 🛋', G.floor1, 'floor1');
 roomFloor(14, 10, 10, 16, FY.F1+0.2, M.floorKitchen, 'Dining Room',
   'Long estate table with built-in bench seating — bay window wall 🍽', G.floor1, 'floor1');
 roomFloor(-16, 8, 14, 12, FY.F1+0.2, M.floorLiving, 'Office',
@@ -771,8 +771,8 @@ roomFloor(-4, 14, 6, 6, FY.F1+0.2, M.floorBath, 'Main Bathroom',
   'Full bath on the main floor — stone tile, walnut vanity 🚿', G.floor1, 'floor1');
 
 // V3: Warm interior lighting for Floor 1
-roomLight(-16, FY.F1+8, -8, G.floor1, 0.5, 16, 0xFFE0A0); // Living room
-roomLight(14, FY.F1+8, -8, G.floor1, 0.35, 14, 0xFFF0C0); // Kitchen
+roomLight(-16, FY.F1+8, -8, G.floor1, 0.35, 14, 0xFFF0C0); // Kitchen
+roomLight(14, FY.F1+8, -8, G.floor1, 0.5, 16, 0xFFE0A0); // Living room
 roomLight(14, FY.F1+8, 12, G.floor1, 0.35, 12, 0xFFE8B0); // Dining
 roomLight(-16, FY.F1+8, 8, G.floor1, 0.3, 12, 0xFFE0A0); // Office
 roomLight(0, FY.F1+8, -14, G.floor1, 0.3, 10, 0xFFE8C0); // Foyer
@@ -780,9 +780,9 @@ roomLight(0, FY.F1+8, -14, G.floor1, 0.3, 10, 0xFFE8C0); // Foyer
 // V3: Exposed ceiling beams — Living Room & Dining (within house footprint)
 for(let i=-1; i<=1; i++) {
   // Living room beams
-  box(14, 0.5, 0.7, M.walnut, G.floor1, -16, FY.F1+SH-0.5, -8+i*5);
+  box(10, 0.5, 0.7, M.walnut, G.floor1, 14, FY.F1+SH-0.5, -8+i*5);
   // Bevel detail
-  box(14.4, 0.15, 0.9, M.oak, G.floor1, -16, FY.F1+SH-0.1, -8+i*5);
+  box(10.4, 0.15, 0.9, M.oak, G.floor1, 14, FY.F1+SH-0.1, -8+i*5);
 }
 // Dining room beams
 for(let i=0; i<3; i++) {
@@ -790,9 +790,9 @@ for(let i=0; i<3; i++) {
   box(10.4, 0.15, 0.9, M.oak, G.floor1, 14, FY.F1+SH-0.1, 5+i*5);
 }
 
-// Furniture — Living Room
-couch(-16, -10, FY.F1+0.15, G.floor1);
-fireplace(-16, 0, FY.F1+0.15, G.floor1);
+// Furniture — Living Room (right side)
+couch(14, -10, FY.F1+0.15, G.floor1);
+fireplace(14, 0, FY.F1+0.15, G.floor1);
 
 // Staircase in foyer
 for(let i=0; i<10; i++) {
@@ -801,23 +801,23 @@ for(let i=0; i<10; i++) {
 box(0.15, 10, 0.15, M.walnut, G.floor1, -2.5, FY.F1+5.3, -8);
 box(0.15, 10, 0.15, M.walnut, G.floor1, 2.5, FY.F1+5.3, -8);
 
-// Kitchen
-kitchenIsland(14, -10, FY.F1+0.15, G.floor1);
-box(8, 3, 1.5, M.cabinet, G.floor1, 14, FY.F1+1.5, -D/2+1.5);
-box(8.2, 0.3, 1.7, M.counter, G.floor1, 14, FY.F1+3.1, -D/2+1.5);
-box(8, 2.5, 1, M.cabinet, G.floor1, 14, FY.F1+7, -D/2+1);
+// Kitchen (left side)
+kitchenIsland(-16, -10, FY.F1+0.15, G.floor1);
+box(8, 3, 1.5, M.cabinet, G.floor1, -16, FY.F1+1.5, -D/2+1.5);
+box(8.2, 0.3, 1.7, M.counter, G.floor1, -16, FY.F1+3.1, -D/2+1.5);
+box(8, 2.5, 1, M.cabinet, G.floor1, -16, FY.F1+7, -D/2+1);
 
 // Stove/range
-box(3, 3, 2, M.metal, G.floor1, 19, FY.F1+1.5, -D/2+1.5);
-box(3.1, 0.1, 2.1, new THREE.MeshStandardMaterial({color:0x333333,roughness:0.3,metalness:0.7}), G.floor1, 19, FY.F1+3.05, -D/2+1.5);
+box(3, 3, 2, M.metal, G.floor1, -11, FY.F1+1.5, -D/2+1.5);
+box(3.1, 0.1, 2.1, new THREE.MeshStandardMaterial({color:0x333333,roughness:0.3,metalness:0.7}), G.floor1, -11, FY.F1+3.05, -D/2+1.5);
 // Burners
 for(let bx of [-0.6, 0.6]) for(let bz of [-0.4, 0.4])
-  cyl(0.35, 0.35, 0.08, 12, new THREE.MeshStandardMaterial({color:0x222222,roughness:0.4,metalness:0.6}), G.floor1, 19+bx, FY.F1+3.12, -D/2+1.5+bz);
+  cyl(0.35, 0.35, 0.08, 12, new THREE.MeshStandardMaterial({color:0x222222,roughness:0.4,metalness:0.6}), G.floor1, -11+bx, FY.F1+3.12, -D/2+1.5+bz);
 
 // Refrigerator
-box(2.5, 6.5, 2, new THREE.MeshStandardMaterial({color:0xE8E8E8,roughness:0.3,metalness:0.15}), G.floor1, 22, FY.F1+3.25, -D/2+1.5);
+box(2.5, 6.5, 2, new THREE.MeshStandardMaterial({color:0xE8E8E8,roughness:0.3,metalness:0.15}), G.floor1, -8, FY.F1+3.25, -D/2+1.5);
 // Fridge handle
-box(0.1, 2.5, 0.15, M.metal, G.floor1, 20.8, FY.F1+4.5, -D/2+0.4);
+box(0.1, 2.5, 0.15, M.metal, G.floor1, -9.2, FY.F1+4.5, -D/2+0.4);
 
 // Dining Room — bench flush with back windows
 diningTable(14, 14, FY.F1+0.15, G.floor1);
@@ -1141,8 +1141,8 @@ gableBackGeo.computeVertexNormals();
 G.structure.add(new THREE.Mesh(gableBackGeo, M.brick));
 
 // Chimney
-box(3, 8, 3, M.chimney, G.structure, -14, FY.F3+SH+6, 2);
-box(3.4, 0.4, 3.4, M.stone, G.structure, -14, FY.F3+SH+10.2, 2);
+box(3, 8, 3, M.chimney, G.structure, 14, FY.F3+SH+6, 2);
+box(3.4, 0.4, 3.4, M.stone, G.structure, 14, FY.F3+SH+10.2, 2);
 
 // V3: Enhanced front door — double doors with panels
 const doorMat = new THREE.MeshStandardMaterial({ map: woodTexture(128,256,'#3A1A08'), roughness: 0.5 });
@@ -1273,9 +1273,9 @@ for(let z of [-10, 0, 10]) {
   addWindow(-W/2+0.1, FY.F2+5.5, z, 3, 4.5, G.structure, Math.PI/2);
   addWindow(W/2-0.1, FY.F2+5.5, z, 3, 4.5, G.structure, Math.PI/2);
 }
-// Windows — back wall (z=D/2), kitchen sink window at x=14
-for(let x of [-18, -10, 10, 14, 18]) {
-  addWindow(x, FY.F1+5.5, D/2-0.1, x===14 ? 4.5 : 3.5, x===14 ? 6 : 5, G.structure, Math.PI);
+// Windows — back wall (z=D/2), kitchen sink window at x=-14
+for(let x of [-18, -14, -10, 10, 18]) {
+  addWindow(x, FY.F1+5.5, D/2-0.1, x===-14 ? 4.5 : 3.5, x===-14 ? 6 : 5, G.structure, Math.PI);
 }
 for(let x of [-18, -10, 10, 18]) {
   addWindow(x, FY.F2+5.5, D/2-0.1, 3, 4.5, G.structure, Math.PI);
@@ -1443,8 +1443,8 @@ label('🎬 Theatre', new THREE.Vector3(-12,FY.B+7,-4), 'basement');
 label('🍸 Bar', new THREE.Vector3(16,FY.B+7,-4), 'basement');
 label('🎮 Play', new THREE.Vector3(0,FY.B+7,12), 'basement');
 label('🚪 Foyer', new THREE.Vector3(0,FY.F1+8,-14), 'floor1');
-label('🛋 Living', new THREE.Vector3(-16,FY.F1+8,-8), 'floor1');
-label('🍳 Kitchen', new THREE.Vector3(14,FY.F1+6,-8), 'floor1');
+label('🍳 Kitchen', new THREE.Vector3(-16,FY.F1+6,-8), 'floor1');
+label('🛋 Living', new THREE.Vector3(14,FY.F1+8,-8), 'floor1');
 label('🍽 Dining', new THREE.Vector3(14,FY.F1+6,12), 'floor1');
 label('📚 Office', new THREE.Vector3(-16,FY.F1+6,8), 'floor1');
 label('🚗 Garage', new THREE.Vector3(42,FY.F1+6,-2), 'floor1');
