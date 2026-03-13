@@ -436,22 +436,17 @@ function roomFloor(x,z,w,d,y,mat,name,desc,group,floorKey) {
 function wall(x,z,w,d,h,y,mat,group) { return box(w,h,d,mat,group,x,y+h/2,z); }
 
 function addWindow(x,y,z,w,h,group,rotY=0) {
-  // V3: More visible window frames
-  const frameMat = new THREE.MeshStandardMaterial({ color: 0x3A2A1A, roughness: 0.6, metalness: 0.1 });
-  const frame = box(w+0.6, h+0.6, 0.35, frameMat, group, x, y, z);
-  if(rotY) frame.rotation.y = rotY;
-  // Inner frame cross
-  const crossH = box(w-0.2, 0.2, 0.4, frameMat, group, x, y, z+(rotY?0:0.01));
-  if(rotY) crossH.rotation.y = rotY;
-  const crossV = box(0.2, h-0.2, 0.4, frameMat, group, x, y, z+(rotY?0:0.01));
-  if(rotY) crossV.rotation.y = rotY;
-  // Glass
-  const glass = box(w-0.3, h-0.3, 0.1, M.glass, group, x, y, z+(rotY?0:0.02));
-  if(rotY) glass.rotation.y = rotY;
-  // V3: Warm glow behind windows (visible from outside)
-  const glow = box(w-0.5, h-0.5, 0.05, M.windowGlow, group, x, y, z+(rotY?0:0.15));
-  if(rotY) glow.rotation.y = rotY;
-  return frame;
+  const fmat = M.walnut;
+  const bt = 0.25; // bar thickness
+  // Outer frame - 4 thin bars
+  const top = box(w+bt*2, bt, bt, fmat, group, x, y+h/2, z); if(rotY) top.rotation.y=rotY;
+  const bot = box(w+bt*2, bt, bt, fmat, group, x, y-h/2, z); if(rotY) bot.rotation.y=rotY;
+  const lft = box(bt, h, bt, fmat, group, x-w/2, y, z); if(rotY) lft.rotation.y=rotY;
+  const rgt = box(bt, h, bt, fmat, group, x+w/2, y, z); if(rotY) rgt.rotation.y=rotY;
+  // Glass pane
+  const glassMat = new THREE.MeshStandardMaterial({ color:0xAAD4EE, roughness:0.05, metalness:0.1, transparent:true, opacity:0.28, depthWrite:false, side:THREE.DoubleSide });
+  const gp = box(w-bt, h-bt, 0.06, glassMat, group, x, y, z); if(rotY) gp.rotation.y=rotY;
+  return top;
 }
 
 // V3: Arched doorway helper
@@ -970,18 +965,61 @@ wall(0, D/2, W+2, 1, 33, FY.B, M.brickTrans, G.structure);
 wall(-W/2, 0, 1, D, 33, FY.B, M.brickTrans, G.structure);
 wall(W/2, 0, 1, D, 33, FY.B, M.brickTrans, G.structure);
 
-// ROOF — gabled
-const roofShape = new THREE.Shape();
-roofShape.moveTo(-W/2-2, 0);
-roofShape.lineTo(0, 12);
-roofShape.lineTo(W/2+2, 0);
-roofShape.lineTo(-W/2-2, 0);
-const roofGeo = new THREE.ExtrudeGeometry(roofShape, { depth: D+4, bevelEnabled: false });
-const roofMesh = new THREE.Mesh(roofGeo, M.roof);
-roofMesh.rotation.x = -Math.PI/2;
-roofMesh.position.set(0, FY.F3+SH+2, -D/2-2);
-roofMesh.castShadow = true;
-G.structure.add(roofMesh);
+// ROOF — gabled (two sloped panels meeting at ridge)
+const roofY = FY.F3 + SH; // top of walls = 31
+const ridgeH = 8;
+const roofHalfW = W/2 + 2; // 29 — half-width of roof overhang
+const slopeLen = Math.sqrt(roofHalfW*roofHalfW + ridgeH*ridgeH); // ~30.1
+const slopeAngle = Math.atan2(ridgeH, roofHalfW);
+
+// Left slope panel
+const leftSlope = new THREE.Mesh(
+  new THREE.BoxGeometry(slopeLen, 0.6, D + 4), M.roof
+);
+leftSlope.position.set(-roofHalfW/2, roofY + ridgeH/2, 0);
+leftSlope.rotation.z = slopeAngle;
+leftSlope.castShadow = true;
+G.structure.add(leftSlope);
+
+// Right slope panel
+const rightSlope = new THREE.Mesh(
+  new THREE.BoxGeometry(slopeLen, 0.6, D + 4), M.roof
+);
+rightSlope.position.set(roofHalfW/2, roofY + ridgeH/2, 0);
+rightSlope.rotation.z = -slopeAngle;
+rightSlope.castShadow = true;
+G.structure.add(rightSlope);
+
+// Ridge cap
+const ridge = new THREE.Mesh(
+  new THREE.BoxGeometry(1.2, 0.8, D + 4), M.walnut
+);
+ridge.position.set(0, roofY + ridgeH, 0);
+G.structure.add(ridge);
+
+// Front gable fill
+const gableFrontGeo = new THREE.BufferGeometry();
+const gfv = new Float32Array([
+  -W/2-2, roofY, -D/2-2,
+   W/2+2, roofY, -D/2-2,
+   0,     roofY+ridgeH, -D/2-2,
+]);
+gableFrontGeo.setAttribute('position', new THREE.BufferAttribute(gfv, 3));
+gableFrontGeo.setIndex([0,1,2]);
+gableFrontGeo.computeVertexNormals();
+G.structure.add(new THREE.Mesh(gableFrontGeo, M.brick));
+
+// Back gable fill
+const gableBackGeo = new THREE.BufferGeometry();
+const gbv = new Float32Array([
+   W/2+2, roofY, D/2+2,
+  -W/2-2, roofY, D/2+2,
+   0,     roofY+ridgeH, D/2+2,
+]);
+gableBackGeo.setAttribute('position', new THREE.BufferAttribute(gbv, 3));
+gableBackGeo.setIndex([0,1,2]);
+gableBackGeo.computeVertexNormals();
+G.structure.add(new THREE.Mesh(gableBackGeo, M.brick));
 
 // Chimney
 box(3, 8, 3, M.chimney, G.structure, -14, FY.F3+SH+6, 2);
