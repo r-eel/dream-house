@@ -513,38 +513,58 @@ function bed(x,z,y,w,d,group,mat=M.bedding) {
 }
 
 function cloudSectional(x,z,y,group) {
-  // Cloud sectional — U-shaped, cream/off-white, pillowy cushions. Open side faces +z
-  const creamMain = new THREE.MeshStandardMaterial({color:0xF0E8E0, roughness:0.95});
-  const creamCush = new THREE.MeshStandardMaterial({color:0xE8DDD0, roughness:0.95});
-  // Back section (runs along x-axis at -z side)
-  box(14, 1.8, 4, creamMain, group, x, y+0.9, z-2);
-  for(let i=-1; i<=1; i++)
-    box(4, 0.7, 3.5, creamCush, group, x+i*4.5, y+2.2, z-2);
-  for(let i=-1; i<=1; i++)
-    box(4, 1.8, 0.8, creamMain, group, x+i*4.5, y+2.8, z-3.8);
-  // Left arm (runs along z-axis at -x side)
-  box(4, 1.8, 5, creamMain, group, x-6, y+0.9, z+1.5);
-  box(3.5, 0.7, 4.5, creamCush, group, x-6, y+2.2, z+1.5);
-  box(0.8, 1.8, 4.5, creamMain, group, x-7.8, y+2.8, z+1.5);
-  // Right arm
-  box(4, 1.8, 5, creamMain, group, x+6, y+0.9, z+1.5);
-  box(3.5, 0.7, 4.5, creamCush, group, x+6, y+2.2, z+1.5);
-  box(0.8, 1.8, 4.5, creamMain, group, x+7.8, y+2.8, z+1.5);
-  // Accent throw pillows
-  box(1.2,1.2,1, new THREE.MeshStandardMaterial({color:0x8B6B3A,roughness:0.9}), group, x-5,y+2.8,z-1);
-  box(1.2,1.2,1, new THREE.MeshStandardMaterial({color:0xC4A265,roughness:0.9}), group, x+4,y+2.8,z-1);
-  box(1,1,1.2, new THREE.MeshStandardMaterial({color:0x8B6B3A,roughness:0.9}), group, x-6,y+2.8,z+3);
-  // Walnut coffee table — low, chunky, square
-  box(4.5, 0.5, 4.5, M.walnut, group, x, y+1.3, z+1.5);
-  box(4, 0.8, 4, M.walnut, group, x, y+0.7, z+1.5);
-  // Area rug (warm beige, larger than couch footprint)
-  box(18, 0.05, 14, new THREE.MeshStandardMaterial({color:0xC8B8A0, roughness:1}), group, x, y+0.03, z);
-  // Fiddle leaf fig plant near corner
-  cyl(0.15, 0.2, 3, 6, new THREE.MeshStandardMaterial({color:0x5C3A1E,roughness:0.8}), group, x+7, y+1.5, z+4);
-  const figLeaf = new THREE.Mesh(new THREE.SphereGeometry(1.3, 8, 8),
+  // Cloud sectional — U-shaped modular, cream/off-white, deep plush cushions
+  // Open side faces +z, chaise/ottoman on right arm
+  const creamBase = new THREE.MeshStandardMaterial({color:0xF0E8E0, roughness:0.95});
+  const creamSeat = new THREE.MeshStandardMaterial({color:0xEDE5DA, roughness:0.92});
+  const creamBack = new THREE.MeshStandardMaterial({color:0xE8DDD0, roughness:0.95});
+  const pillow1 = new THREE.MeshStandardMaterial({color:0x8B6B3A, roughness:0.9});
+  const pillow2 = new THREE.MeshStandardMaterial({color:0xC4A265, roughness:0.9});
+
+  // Helper: one modular seat module — base slab + raised seat cushion + back cushion
+  function seatModule(sx,sz,sw,sd, backAxis) {
+    box(sw, 1.2, sd, creamBase, group, sx, y+0.6, sz);
+    box(sw-0.3, 0.6, sd-0.3, creamSeat, group, sx, y+1.5, sz);
+    if(backAxis==='z-') box(sw-0.2, 1.6, 1.0, creamBack, group, sx, y+2.0, sz-sd/2+0.5);
+    if(backAxis==='z+') box(sw-0.2, 1.6, 1.0, creamBack, group, sx, y+2.0, sz+sd/2-0.5);
+    if(backAxis==='x-') box(1.0, 1.6, sd-0.2, creamBack, group, sx-sw/2+0.5, y+2.0, sz);
+    if(backAxis==='x+') box(1.0, 1.6, sd-0.2, creamBack, group, sx+sw/2-0.5, y+2.0, sz);
+  }
+
+  // === BACK SECTION (3 seats along x-axis, backs toward -z) ===
+  seatModule(x-4.5, z-2, 4.2, 3.8, 'z-');
+  seatModule(x,     z-2, 4.2, 3.8, 'z-');
+  seatModule(x+4.5, z-2, 4.2, 3.8, 'z-');
+
+  // === LEFT ARM (2 seats along z-axis, backs toward -x) ===
+  seatModule(x-6.5, z+1,  3.8, 3.5, 'x-');
+  seatModule(x-6.5, z+4.5, 3.8, 3.5, 'x-');
+
+  // === RIGHT ARM — chaise/ottoman (deeper, low bolster instead of full back) ===
+  box(5, 1.2, 7, creamBase, group, x+6.5, y+0.6, z+2.5);
+  box(4.7, 0.6, 6.7, creamSeat, group, x+6.5, y+1.5, z+2.5);
+  box(1.0, 1.0, 6.5, creamBack, group, x+8.5, y+1.8, z+2.5);
+
+  // === ACCENT THROW PILLOWS ===
+  box(1.2,1.2,0.8, pillow1, group, x-4.5, y+2.8, z-1.5);
+  box(1.2,1.2,0.8, pillow2, group, x+4, y+2.8, z-1.5);
+  box(0.8,1.0,1.2, pillow1, group, x-6.5, y+2.8, z+4.5);
+  box(1.2,1.0,1.2, pillow2, group, x+6, y+2.5, z+5);
+
+  // === WALNUT COFFEE TABLE — low, chunky, square (centered in U) ===
+  box(4.5, 0.5, 4.5, M.walnut, group, x, y+1.5, z+1.5);
+  box(4.0, 1.0, 4.0, M.walnut, group, x, y+0.7, z+1.5);
+
+  // === AREA RUG — warm beige underneath everything ===
+  box(20, 0.05, 16, new THREE.MeshStandardMaterial({color:0xC8B8A0, roughness:1}), group, x, y+0.03, z+0.5);
+
+  // === FIDDLE LEAF FIG — potted plant near left-back corner ===
+  cyl(0.6, 0.5, 1.0, 8, new THREE.MeshStandardMaterial({color:0x8B7355,roughness:0.9}), group, x-8.5, y+0.5, z-3.5);
+  cyl(0.15, 0.2, 3.5, 6, new THREE.MeshStandardMaterial({color:0x5C3A1E,roughness:0.8}), group, x-8.5, y+2.75, z-3.5);
+  const figLeaf = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 8),
     new THREE.MeshStandardMaterial({color:0x2D5A1E, roughness:0.8}));
-  figLeaf.position.set(x+7, y+3.8, z+4);
-  figLeaf.scale.set(1, 1.4, 1);
+  figLeaf.position.set(x-8.5, y+5.5, z-3.5);
+  figLeaf.scale.set(1, 1.6, 1);
   figLeaf.castShadow = true;
   group.add(figLeaf);
 }
@@ -774,8 +794,12 @@ wallWithDoor(12, 4, 14, WT, SH, FY.F1, M.creamWall, G.floor1, 0, 3.5);
 wall(-24, -5, 6, WT, SH, FY.F1, M.creamWall, G.floor1); // front wall (E-W at z=-5)
 wall(-24, 1, 6, WT, SH, FY.F1, M.creamWall, G.floor1);  // back wall (E-W at z=1)
 wallWithDoor(-21, -2, 6, 0.6, SH, FY.F1, M.creamWall, G.floor1, 0, 3); // right wall (N-S at x=-21, door to kitchen)
-// Bathroom wall
-wall(-4, 11, 6, WT, SH, FY.F1, M.creamWall, G.floor1);
+// Office west wall (N-S at x=6, z=4..16, with door)
+wallWithDoor(6, 10, 12, 0.6, SH, FY.F1, M.creamWall, G.floor1, 0, 3.5);
+// Bathroom walls — south, east, west
+wall(-4, 11, 6, WT, SH, FY.F1, M.creamWall, G.floor1);  // south wall (E-W at z=11)
+wall(-1, 14, WT, 6, SH, FY.F1, M.creamWall, G.floor1);  // east wall (N-S at x=-1)
+wallWithDoor(-7, 14, 6, 0.6, SH, FY.F1, M.creamWall, G.floor1, 0, 3); // west wall (N-S at x=-7, door to kitchen)
 
 // Room floors
 roomFloor(0, -14, 10, 8, FY.F1+0.2, M.floorLiving, 'Grand Foyer',
@@ -1340,7 +1364,7 @@ roomFloor(-8, D/2+12, 20, 10, FY.F1-0.1, M.patio, 'Patio',
 // Patio furniture — table + proper chairs (backyard)
 box(6, 2, 6, M.oak, G.outdoor, -8, FY.F1+1, D/2+14);
 for(let dx of [-4, 4]) for(let dz of [-4, 4]) {
-  const chairAngle = Math.atan2(-dz, -dx);
+  const chairAngle = Math.atan2(-dx, -dz);
   diningChair(-8+dx, D/2+14+dz, FY.F1, G.outdoor, chairAngle);
 }
 // Umbrella
@@ -1412,7 +1436,7 @@ G.outdoor.add(fireLight);
 // Adirondack chairs around fire pit (backyard)
 for(let angle=0; angle<Math.PI*2; angle+=Math.PI/3) {
   const cx=-8+Math.cos(angle)*6.5, cz=D/2+26+Math.sin(angle)*6.5;
-  adirondackChair(cx, cz, FY.F1, G.outdoor, -angle + Math.PI);
+  adirondackChair(cx, cz, FY.F1, G.outdoor, -angle - Math.PI/2);
 }
 
 // Stone pathway from front entrance to street
