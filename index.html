@@ -512,16 +512,41 @@ function bed(x,z,y,w,d,group,mat=M.bedding) {
   box(w*0.35, 0.4, 0.8, M.cream, group, x+w*0.2, y+2, z+d/2-1);
 }
 
-function couch(x,z,y,group) {
-  // U-shaped couch — open side faces +z (toward fireplace)
-  box(14, 2, 4, M.couchFabric, group, x, y+1, z);
-  box(4, 2, 6, M.couchFabric, group, x-6, y+1, z-1);
-  box(4, 2, 6, M.couchFabric, group, x+6, y+1, z-1);
-  box(14, 1.5, 0.8, M.couchFabric, group, x, y+2.2, z-1.8);
-  box(4, 1.5, 0.8, M.couchFabric, group, x-6, y+2.2, z-3.5);
-  box(4, 1.5, 0.8, M.couchFabric, group, x+6, y+2.2, z-3.5);
-  box(1.2,1.2,1, new THREE.MeshStandardMaterial({color:0xA0522D,roughness:0.9}), group, x-5,y+2.5,z);
-  box(1.2,1.2,1, new THREE.MeshStandardMaterial({color:0x8B7355,roughness:0.9}), group, x+5,y+2.5,z);
+function cloudSectional(x,z,y,group) {
+  // Cloud sectional — U-shaped, cream/off-white, pillowy cushions. Open side faces +z
+  const creamMain = new THREE.MeshStandardMaterial({color:0xF0E8E0, roughness:0.95});
+  const creamCush = new THREE.MeshStandardMaterial({color:0xE8DDD0, roughness:0.95});
+  // Back section (runs along x-axis at -z side)
+  box(14, 1.8, 4, creamMain, group, x, y+0.9, z-2);
+  for(let i=-1; i<=1; i++)
+    box(4, 0.7, 3.5, creamCush, group, x+i*4.5, y+2.2, z-2);
+  for(let i=-1; i<=1; i++)
+    box(4, 1.8, 0.8, creamMain, group, x+i*4.5, y+2.8, z-3.8);
+  // Left arm (runs along z-axis at -x side)
+  box(4, 1.8, 5, creamMain, group, x-6, y+0.9, z+1.5);
+  box(3.5, 0.7, 4.5, creamCush, group, x-6, y+2.2, z+1.5);
+  box(0.8, 1.8, 4.5, creamMain, group, x-7.8, y+2.8, z+1.5);
+  // Right arm
+  box(4, 1.8, 5, creamMain, group, x+6, y+0.9, z+1.5);
+  box(3.5, 0.7, 4.5, creamCush, group, x+6, y+2.2, z+1.5);
+  box(0.8, 1.8, 4.5, creamMain, group, x+7.8, y+2.8, z+1.5);
+  // Accent throw pillows
+  box(1.2,1.2,1, new THREE.MeshStandardMaterial({color:0x8B6B3A,roughness:0.9}), group, x-5,y+2.8,z-1);
+  box(1.2,1.2,1, new THREE.MeshStandardMaterial({color:0xC4A265,roughness:0.9}), group, x+4,y+2.8,z-1);
+  box(1,1,1.2, new THREE.MeshStandardMaterial({color:0x8B6B3A,roughness:0.9}), group, x-6,y+2.8,z+3);
+  // Walnut coffee table — low, chunky, square
+  box(4.5, 0.5, 4.5, M.walnut, group, x, y+1.3, z+1.5);
+  box(4, 0.8, 4, M.walnut, group, x, y+0.7, z+1.5);
+  // Area rug (warm beige, larger than couch footprint)
+  box(18, 0.05, 14, new THREE.MeshStandardMaterial({color:0xC8B8A0, roughness:1}), group, x, y+0.03, z);
+  // Fiddle leaf fig plant near corner
+  cyl(0.15, 0.2, 3, 6, new THREE.MeshStandardMaterial({color:0x5C3A1E,roughness:0.8}), group, x+7, y+1.5, z+4);
+  const figLeaf = new THREE.Mesh(new THREE.SphereGeometry(1.3, 8, 8),
+    new THREE.MeshStandardMaterial({color:0x2D5A1E, roughness:0.8}));
+  figLeaf.position.set(x+7, y+3.8, z+4);
+  figLeaf.scale.set(1, 1.4, 1);
+  figLeaf.castShadow = true;
+  group.add(figLeaf);
 }
 
 function diningTable(x,z,y,group) {
@@ -736,32 +761,30 @@ for(let i=-2; i<=2; i++) {
 // ═══════════════════════════════════════════════════
 box(W, 0.3, D, M.walnutFloor, G.floor1, 0, FY.F1, 0);
 
-// V3: Interior walls with arched doorways
-// Foyer to living room (shortened to clear staircase at x=0)
-wallWithDoor(-10, -10, 12, WT, SH, FY.F1, M.creamWall, G.floor1, 0, 4);
-// Living room to kitchen (partial wall)
-wallWithDoor(0, 0, D-16, WT, SH, FY.F1, M.creamWall, G.floor1, 0, 4);
-// Kitchen east wall
-wallWithDoor(8, 5, D-16, WT, SH, FY.F1, M.creamWall, G.floor1, -2, 4);
-// North-south divide
-wallWithDoor(0, 2, 16, WT, SH, FY.F1, M.creamWall, G.floor1, 4, 3.5);
+// Interior walls with arched doorways
+// Left/center divider (N-S at x=-5) — dining/kitchen from foyer/living
+wallWithDoor(-5, 2, 28, WT, SH, FY.F1, M.creamWall, G.floor1, -6, 4);
+// Dining/Kitchen horizontal divider (E-W at z=0, left side)
+wallWithDoor(-16, 0, 22, WT, SH, FY.F1, M.creamWall, G.floor1, 0, 4);
+// Foyer to living room (N-S at x=5)
+wallWithDoor(5, -9, 14, WT, SH, FY.F1, M.creamWall, G.floor1, 2, 4);
+// Living/Office divider (E-W at z=4, right side)
+wallWithDoor(12, 4, 14, WT, SH, FY.F1, M.creamWall, G.floor1, 0, 3.5);
 // Mudroom/Garage wall
 wall(18, 0, WT, 10, SH, FY.F1, M.creamWall, G.floor1);
-// Office divider with arched doorway
-wallWithDoor(-8, 2, 14, WT, SH, FY.F1, M.creamWall, G.floor1, 0, 3.5);
 // Bathroom wall
 wall(-1, 14, 6, WT, SH, FY.F1, M.creamWall, G.floor1);
 
 // Room floors
-roomFloor(0, -14, 12, 8, FY.F1+0.2, M.floorLiving, 'Grand Foyer',
+roomFloor(0, -14, 10, 8, FY.F1+0.2, M.floorLiving, 'Grand Foyer',
   'Double doors, soaring ceiling with staircase — the first thing you see 🚪', G.floor1, 'floor1');
-roomFloor(-16, -8, 14, 16, FY.F1+0.2, M.floorKitchen, 'Kitchen',
-  'Warm walnut cabinets, stone countertops, island with stools 🍳', G.floor1, 'floor1');
-roomFloor(14, -8, 10, 12, FY.F1+0.2, M.floorLiving, 'Living Room',
-  'High ceilings, stone fireplace, drop-down projector, huge U-shaped couch 🛋', G.floor1, 'floor1');
-roomFloor(14, 10, 10, 16, FY.F1+0.2, M.floorKitchen, 'Dining Room',
-  'Long estate table with built-in bench seating — bay window wall 🍽', G.floor1, 'floor1');
-roomFloor(-16, 8, 14, 12, FY.F1+0.2, M.floorLiving, 'Office',
+roomFloor(-16, -10, 20, 14, FY.F1+0.2, M.floorKitchen, 'Dining Room',
+  'Long estate table with built-in bench — backs up to front windows 🍽', G.floor1, 'floor1');
+roomFloor(-16, 8, 20, 16, FY.F1+0.2, M.floorKitchen, 'Kitchen',
+  'L-shaped layout, walnut cabinets, stone countertops, island with stools 🍳', G.floor1, 'floor1');
+roomFloor(12, -6, 14, 16, FY.F1+0.2, M.floorLiving, 'Living Room',
+  'High ceilings, stone fireplace, cloud sectional, fiddle leaf fig 🛋', G.floor1, 'floor1');
+roomFloor(12, 12, 12, 8, FY.F1+0.2, M.floorLiving, 'Office',
   'Lots of windows, bay window seating — Rob\'s remote HQ 📚', G.floor1, 'floor1');
 roomFloor(22, 0, 6, 6, FY.F1+0.2, M.floorUtility, 'Mud Room',
   'Drop zone between garage and kitchen — hooks, bench, shoe storage 🧥', G.floor1, 'floor1');
@@ -770,29 +793,28 @@ roomFloor(42, -2, 30, 20, FY.F1+0.2, M.floorUtility, 'Garage',
 roomFloor(-4, 14, 6, 6, FY.F1+0.2, M.floorBath, 'Main Bathroom',
   'Full bath on the main floor — stone tile, walnut vanity 🚿', G.floor1, 'floor1');
 
-// V3: Warm interior lighting for Floor 1
-roomLight(-16, FY.F1+8, -8, G.floor1, 0.35, 14, 0xFFF0C0); // Kitchen
-roomLight(14, FY.F1+8, -8, G.floor1, 0.5, 16, 0xFFE0A0); // Living room
-roomLight(14, FY.F1+8, 12, G.floor1, 0.35, 12, 0xFFE8B0); // Dining
-roomLight(-16, FY.F1+8, 8, G.floor1, 0.3, 12, 0xFFE0A0); // Office
+// Warm interior lighting for Floor 1
+roomLight(-16, FY.F1+8, 8, G.floor1, 0.35, 14, 0xFFF0C0); // Kitchen
+roomLight(12, FY.F1+8, -6, G.floor1, 0.5, 16, 0xFFE0A0); // Living room
+roomLight(-16, FY.F1+8, -10, G.floor1, 0.35, 12, 0xFFE8B0); // Dining
+roomLight(12, FY.F1+8, 12, G.floor1, 0.3, 12, 0xFFE0A0); // Office
 roomLight(0, FY.F1+8, -14, G.floor1, 0.3, 10, 0xFFE8C0); // Foyer
 
-// V3: Exposed ceiling beams — Living Room & Dining (within house footprint)
+// Exposed ceiling beams — Living Room & Kitchen
 for(let i=-1; i<=1; i++) {
   // Living room beams
-  box(10, 0.5, 0.7, M.walnut, G.floor1, 14, FY.F1+SH-0.5, -8+i*5);
-  // Bevel detail
-  box(10.4, 0.15, 0.9, M.oak, G.floor1, 14, FY.F1+SH-0.1, -8+i*5);
+  box(14, 0.5, 0.7, M.walnut, G.floor1, 12, FY.F1+SH-0.5, -6+i*5);
+  box(14.4, 0.15, 0.9, M.oak, G.floor1, 12, FY.F1+SH-0.1, -6+i*5);
 }
-// Dining room beams
+// Kitchen beams
 for(let i=0; i<3; i++) {
-  box(10, 0.5, 0.7, M.walnut, G.floor1, 14, FY.F1+SH-0.5, 5+i*5);
-  box(10.4, 0.15, 0.9, M.oak, G.floor1, 14, FY.F1+SH-0.1, 5+i*5);
+  box(20, 0.5, 0.7, M.walnut, G.floor1, -16, FY.F1+SH-0.5, 2+i*5);
+  box(20.4, 0.15, 0.9, M.oak, G.floor1, -16, FY.F1+SH-0.1, 2+i*5);
 }
 
 // Furniture — Living Room (right side)
-couch(14, -10, FY.F1+0.15, G.floor1);
-fireplace(14, 0, FY.F1+0.15, G.floor1);
+cloudSectional(12, -8, FY.F1+0.15, G.floor1);
+fireplace(14, 2, FY.F1+0.15, G.floor1);
 
 // Staircase in foyer
 for(let i=0; i<10; i++) {
@@ -801,30 +823,48 @@ for(let i=0; i<10; i++) {
 box(0.15, 10, 0.15, M.walnut, G.floor1, -2.5, FY.F1+5.3, -8);
 box(0.15, 10, 0.15, M.walnut, G.floor1, 2.5, FY.F1+5.3, -8);
 
-// Kitchen (left side)
-kitchenIsland(-16, -10, FY.F1+0.15, G.floor1);
-box(8, 3, 1.5, M.cabinet, G.floor1, -16, FY.F1+1.5, -D/2+1.5);
-box(8.2, 0.3, 1.7, M.counter, G.floor1, -16, FY.F1+3.1, -D/2+1.5);
-box(8, 2.5, 1, M.cabinet, G.floor1, -16, FY.F1+7, -D/2+1);
-
-// Stove/range
-box(3, 3, 2, M.metal, G.floor1, -11, FY.F1+1.5, -D/2+1.5);
-box(3.1, 0.1, 2.1, new THREE.MeshStandardMaterial({color:0x333333,roughness:0.3,metalness:0.7}), G.floor1, -11, FY.F1+3.05, -D/2+1.5);
-// Burners
+// Kitchen — L-shaped in back-left corner
+// Back wall arm (z≈17): cabinets + countertops + stove
+box(12, 3, 1.5, M.cabinet, G.floor1, -20, FY.F1+1.5, D/2-1.5);
+box(12.2, 0.3, 1.7, M.counter, G.floor1, -20, FY.F1+3.1, D/2-1.5);
+box(12, 2.5, 1, M.cabinet, G.floor1, -20, FY.F1+7, D/2-1);
+// Stove/range on back wall
+box(3, 3, 2, M.metal, G.floor1, -14, FY.F1+1.5, D/2-1.5);
+box(3.1, 0.1, 2.1, new THREE.MeshStandardMaterial({color:0x333333,roughness:0.3,metalness:0.7}), G.floor1, -14, FY.F1+3.05, D/2-1.5);
 for(let bx of [-0.6, 0.6]) for(let bz of [-0.4, 0.4])
-  cyl(0.35, 0.35, 0.08, 12, new THREE.MeshStandardMaterial({color:0x222222,roughness:0.4,metalness:0.6}), G.floor1, -11+bx, FY.F1+3.12, -D/2+1.5+bz);
+  cyl(0.35, 0.35, 0.08, 12, new THREE.MeshStandardMaterial({color:0x222222,roughness:0.4,metalness:0.6}), G.floor1, -14+bx, FY.F1+3.12, D/2-1.5+bz);
+// Left wall arm (x≈-26): cabinets + countertops + fridge
+box(1.5, 3, 10, M.cabinet, G.floor1, -W/2+1.5, FY.F1+1.5, 10);
+box(1.7, 0.3, 10.2, M.counter, G.floor1, -W/2+1.5, FY.F1+3.1, 10);
+box(1, 2.5, 10, M.cabinet, G.floor1, -W/2+1, FY.F1+7, 10);
+// Refrigerator on left wall
+box(2, 6.5, 2.5, new THREE.MeshStandardMaterial({color:0xE8E8E8,roughness:0.3,metalness:0.15}), G.floor1, -W/2+1.5, FY.F1+3.25, 4);
+box(0.15, 2.5, 0.1, M.metal, G.floor1, -W/2+0.4, FY.F1+4.5, 4);
+// Kitchen island — barstools face +x (toward center of house)
+box(3, 3, 8, M.cabinet, G.floor1, -14, FY.F1+1.5, 8);
+box(3.2, 0.4, 8.2, M.counter, G.floor1, -14, FY.F1+3.1, 8);
+for(let i=-1; i<=1; i++) {
+  cyl(0.5,0.5,0.3,8, M.walnut, G.floor1, -12, FY.F1+2, 8+i*2.5);
+  cyl(0.15,0.15,2,8, M.metal, G.floor1, -12, FY.F1+1, 8+i*2.5);
+}
 
-// Refrigerator
-box(2.5, 6.5, 2, new THREE.MeshStandardMaterial({color:0xE8E8E8,roughness:0.3,metalness:0.15}), G.floor1, -8, FY.F1+3.25, -D/2+1.5);
-// Fridge handle
-box(0.1, 2.5, 0.15, M.metal, G.floor1, -9.2, FY.F1+4.5, -D/2+0.4);
+// Dining Room — front-left, bench flush against front windows
+box(14, 0.4, 5, M.oak, G.floor1, -16, FY.F1+2.95, -12);
+box(0.5,2.6,0.5, M.walnut, G.floor1, -22, FY.F1+1.3, -10.2);
+box(0.5,2.6,0.5, M.walnut, G.floor1, -10, FY.F1+1.3, -10.2);
+box(0.5,2.6,0.5, M.walnut, G.floor1, -22, FY.F1+1.3, -13.8);
+box(0.5,2.6,0.5, M.walnut, G.floor1, -10, FY.F1+1.3, -13.8);
+// Built-in bench — flush against front windows
+box(14, 1.5, 2.5, M.couchFabric, G.floor1, -16, FY.F1+0.75, -16);
+box(14, 2.5, 0.5, M.couchFabric, G.floor1, -16, FY.F1+2.5, -17.2);
+// Dining chairs on +z side (facing into the bench/windows)
+for(let i=-2; i<=2; i++) {
+  diningChair(-16+i*2.5, -9, FY.F1, G.floor1, Math.PI);
+}
 
-// Dining Room — bench flush with back windows
-diningTable(14, 14, FY.F1+0.15, G.floor1);
-
-// Office
-desk(-16, 6, FY.F1+0.15, G.floor1);
-box(8, 1.5, 2.5, M.couchFabric, G.floor1, -16, FY.F1+0.75, D/2-2);
+// Office (back-right)
+desk(12, 10, FY.F1+0.15, G.floor1);
+box(8, 1.5, 2.5, M.couchFabric, G.floor1, 12, FY.F1+0.75, D/2-2);
 
 // Main bathroom
 vanity(-4, 16, FY.F1+0.15, 4, G.floor1);
@@ -1443,10 +1483,10 @@ label('🎬 Theatre', new THREE.Vector3(-12,FY.B+7,-4), 'basement');
 label('🍸 Bar', new THREE.Vector3(16,FY.B+7,-4), 'basement');
 label('🎮 Play', new THREE.Vector3(0,FY.B+7,12), 'basement');
 label('🚪 Foyer', new THREE.Vector3(0,FY.F1+8,-14), 'floor1');
-label('🍳 Kitchen', new THREE.Vector3(-16,FY.F1+6,-8), 'floor1');
-label('🛋 Living', new THREE.Vector3(14,FY.F1+8,-8), 'floor1');
-label('🍽 Dining', new THREE.Vector3(14,FY.F1+6,12), 'floor1');
-label('📚 Office', new THREE.Vector3(-16,FY.F1+6,8), 'floor1');
+label('🍳 Kitchen', new THREE.Vector3(-16,FY.F1+6,8), 'floor1');
+label('🛋 Living', new THREE.Vector3(12,FY.F1+8,-6), 'floor1');
+label('🍽 Dining', new THREE.Vector3(-16,FY.F1+6,-10), 'floor1');
+label('📚 Office', new THREE.Vector3(12,FY.F1+6,12), 'floor1');
 label('🚗 Garage', new THREE.Vector3(42,FY.F1+6,-2), 'floor1');
 label('🧥 Mudroom', new THREE.Vector3(22,FY.F1+6,0), 'floor1');
 label('🛏 Bed 1', new THREE.Vector3(-14,FY.F2+6,-11), 'floor2');
