@@ -1194,12 +1194,12 @@ umbMesh.position.set(-8, FY.F1+7, D/2+14);
 G.outdoor.add(umbMesh);
 
 // V4: Triangle string lights — two house wall points to a backyard tree
-// Tree anchor point in backyard
-tree(-8, D/2+30, FY.F1, G.outdoor, 1.3);
+// Tree anchor point in backyard (offset from fire pit for safety!)
+tree(-20, D/2+22, FY.F1, G.outdoor, 1.3);
 const triPts = [
   {x: -14, y: FY.F1+9, z: D/2},   // Left wall attach
   {x: -2,  y: FY.F1+9, z: D/2},    // Right wall attach
-  {x: -8,  y: FY.F1+8, z: D/2+30}, // Tree attach
+  {x: -20, y: FY.F1+8, z: D/2+22}, // Tree attach
 ];
 const bulbMat = new THREE.MeshStandardMaterial({color:0xFFDD88,emissive:0xFFCC66,emissiveIntensity:0.8});
 // Draw 3 catenary lines forming a triangle
