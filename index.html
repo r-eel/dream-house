@@ -890,6 +890,33 @@ G.floor1.add(garageRoof);
 // Garage interior light
 roomLight(42, garageFloorY+8, -2, G.floor1, 0.2, 18, 0xFFFFE0);
 
+// VEHICLES
+const indigoMat = new THREE.MeshStandardMaterial({color:0x2B0057, roughness:0.25, metalness:0.6});
+const silverMat = new THREE.MeshStandardMaterial({color:0xC0C0C8, roughness:0.2, metalness:0.7});
+const tireMat = new THREE.MeshStandardMaterial({color:0x1A1A1A, roughness:0.9});
+const windshieldMat = new THREE.MeshStandardMaterial({color:0x88AACC, roughness:0.05, metalness:0.3, transparent:true, opacity:0.4});
+
+// Indigo sports car (bay 1 — left)
+const carX=33, carZ=-2, carY=garageFloorY;
+box(3.5, 1.2, 7, indigoMat, G.floor1, carX, carY+1.2, carZ); // body
+box(3, 1.1, 3, indigoMat, G.floor1, carX, carY+2.6, carZ+0.5); // cabin
+box(2.8, 1, 2.8, windshieldMat, G.floor1, carX, carY+2.65, carZ+0.5); // windshield
+// Wheels
+for(let wz of [-2.2, 2.2]) for(let wx of [-1.6, 1.6]) {
+  cyl(0.55, 0.55, 0.4, 12, tireMat, G.floor1, carX+wx, carY+0.55, carZ+wz);
+}
+
+// Silver truck (bay 2 — middle)
+const trX=42, trZ=-2, trY=garageFloorY;
+box(4, 1.8, 8, silverMat, G.floor1, trX, trY+1.8, trZ); // body
+box(3.6, 1.8, 3.5, silverMat, G.floor1, trX, trY+3.9, trZ+2); // cab
+box(3.3, 1.6, 3.3, windshieldMat, G.floor1, trX, trY+3.95, trZ+2); // windshield
+box(3.8, 1.2, 4, silverMat, G.floor1, trX, trY+2.3, trZ-2); // truck bed
+// Wheels — bigger for truck
+for(let wz of [-2.5, 2.5]) for(let wx of [-1.8, 1.8]) {
+  cyl(0.7, 0.7, 0.5, 12, tireMat, G.floor1, trX+wx, trY+0.7, trZ+wz);
+}
+
 // ═══════════════════════════════════════════════════
 // MUDROOM FURNITURE — between garage and kitchen
 // ═══════════════════════════════════════════════════
