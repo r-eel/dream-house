@@ -78,6 +78,25 @@
   .legend-item { display: flex; align-items: center; gap: 5px; }
   .legend-swatch { width: 9px; height: 9px; border-radius: 2px; }
   #instructions { position: absolute; bottom: max(90px, env(safe-area-inset-bottom,24px)+70px); left: 16px; font-size: 0.55rem; color: #6a5d50; z-index: 10; line-height: 1.5; }
+  #fps-hints {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: rgba(26,22,18,0.92); border: 1px solid rgba(212,165,116,0.4);
+    border-radius: 12px; padding: 24px 32px; z-index: 20; text-align: center;
+    backdrop-filter: blur(10px); pointer-events: none; opacity: 0; transition: opacity 0.4s;
+  }
+  #fps-hints.visible { opacity: 1; }
+  #fps-hints h3 { font-family: 'Playfair Display', serif; color: #d4a574; font-size: 1rem; margin-bottom: 8px; }
+  #fps-hints p { font-size: 0.7rem; color: #9a8b7a; line-height: 1.6; }
+  #fps-hints kbd { background: rgba(212,165,116,0.15); border: 1px solid rgba(212,165,116,0.3); border-radius: 4px; padding: 1px 6px; font-family: 'Inter', sans-serif; font-size: 0.65rem; color: #d4a574; }
+  #fps-crosshair {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 20px; height: 20px; z-index: 15; pointer-events: none; display: none;
+  }
+  #fps-crosshair::before, #fps-crosshair::after {
+    content: ''; position: absolute; background: rgba(212,165,116,0.5);
+  }
+  #fps-crosshair::before { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
+  #fps-crosshair::after { height: 2px; width: 100%; top: 50%; transform: translateY(-50%); }
   @media (max-width: 768px) {
     #floor-panel { left: 8px; top: auto; bottom: 16px; transform: none; }
     .floor-btn { width: 80px; padding: 6px 8px; font-size: 0.55rem; }
@@ -91,6 +110,7 @@
     .panel-toggle { width: 32px; height: 32px; font-size: 0.85rem; }
     #legend-wrapper { display: none; }
     #instructions { display: none; }
+    #btn-fps { display: none; }
     #room-info { bottom: auto !important; top: 65px; max-width: 85vw; padding: 10px 16px; }
     #room-info .room-name { font-size: 0.9rem; }
     #room-info .room-desc { font-size: 0.62rem; }
@@ -120,7 +140,15 @@
       <button class="view-btn" id="btn-top" title="Top View">⬆</button>
       <button class="view-btn active" id="btn-3d" title="3D View">◆</button>
       <button class="view-btn" id="btn-front" title="Front View">▣</button>
+      <button class="view-btn" id="btn-fps" title="Walkthrough Mode">🚶</button>
     </div>
+  </div>
+  <div id="fps-crosshair"></div>
+  <div id="fps-hints">
+    <h3>Walkthrough Mode</h3>
+    <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> to move<br>
+    Mouse to look around<br>
+    <kbd>ESC</kbd> to exit</p>
   </div>
   <div id="room-info">
     <div class="room-name" id="room-name"></div>
@@ -148,6 +176,7 @@
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
 // ═══════════════════════════════════════════════════
 // SCENE
@@ -1677,6 +1706,7 @@ const roomDescEl = document.getElementById('room-desc');
 
 renderer.domElement.addEventListener('pointerdown', e => {
   const rect = renderer.domElement.getBoundingClientRect();
+  if (fpsMode) return;
   mouse.x = ((e.clientX-rect.left)/rect.width)*2-1;
   mouse.y = -((e.clientY-rect.top)/rect.height)*2+1;
   raycaster.setFromCamera(mouse, camera);
@@ -1703,6 +1733,7 @@ document.querySelectorAll('.floor-btn').forEach(btn => {
     btn.classList.add('active');
     const f = btn.dataset.floor;
     if(f==='all') {
+      if (fpsMode) exitFPS();
       Object.values(G).forEach(g=>{g.visible=true});
       M.brickTrans.opacity = 0.25;
       animateTo(camera.position,{x:55,y:50,z:55});
@@ -1712,10 +1743,14 @@ document.querySelectorAll('.floor-btn').forEach(btn => {
         g.visible = k===f;
       });
       G.structure.visible = false;
-      const camY = {basement:-2, floor1:18, floor2:28, floor3:38, outdoor:20};
-      const targY = {basement:-5, floor1:2, floor2:12, floor3:22, outdoor:1};
-      animateTo(camera.position,{x:40,y:camY[f]||20,z:40});
-      animateTo(controls.target,{x:0,y:targY[f]||6,z:0});
+      if (fpsMode) {
+        fpsTeleportToFloor(f);
+      } else {
+        const camY = {basement:-2, floor1:18, floor2:28, floor3:38, outdoor:20};
+        const targY = {basement:-5, floor1:2, floor2:12, floor3:22, outdoor:1};
+        animateTo(camera.position,{x:40,y:camY[f]||20,z:40});
+        animateTo(controls.target,{x:0,y:targY[f]||6,z:0});
+      }
       if(f==='basement') {
         G.outdoor.visible = false;
       } else {
@@ -1766,11 +1801,173 @@ document.getElementById('toggle-legend').onclick=()=>document.getElementById('le
 if(innerWidth<=768){document.getElementById('view-buttons').classList.add('collapsed');document.getElementById('legend')?.classList.add('collapsed');}
 
 // ═══════════════════════════════════════════════════
+// FIRST-PERSON WALKTHROUGH MODE
+// ═══════════════════════════════════════════════════
+const fpsControls = new PointerLockControls(camera, renderer.domElement);
+let fpsMode = false;
+const fpsKeys = { forward:false, backward:false, left:false, right:false };
+const fpsSpeed = 18; // units per second
+const fpsEyeHeight = 5.5; // Rob is 6'4"
+
+const fpsSpawns = {
+  basement: { x:0, z:0 },
+  floor1:   { x:0, z:-14 },
+  floor2:   { x:-2, z:0 },
+  floor3:   { x:6, z:-4 },
+  outdoor:  { x:-8, z:30 },
+};
+
+// Floor boundaries for clamping
+const fpsBounds = {
+  basement: { xMin:-27, xMax:27, zMin:-18, zMax:18 },
+  floor1:   { xMin:-57, xMax:27, zMin:-18, zMax:18 },
+  floor2:   { xMin:-24, xMax:20, zMin:-16, zMax:16 },
+  floor3:   { xMin:-24, xMax:27, zMin:-16, zMax:16 },
+  outdoor:  { xMin:-70, xMax:45, zMin:-50, zMax:50 },
+};
+
+let fpsCurrentFloor = 'floor1';
+// Store orbital state for restoration
+let savedCamPos, savedTarget;
+
+function getFloorEyeY(floor) {
+  const fy = { basement: FY.B, floor1: FY.F1, floor2: FY.F2, floor3: FY.F3, outdoor: FY.F1 };
+  return (fy[floor] ?? 0) + fpsEyeHeight;
+}
+
+function enterFPS() {
+  // Determine which floor is currently shown
+  const activeBtn = document.querySelector('.floor-btn.active');
+  const floor = activeBtn?.dataset.floor;
+  if (!floor || floor === 'all') {
+    // Switch to floor1 if viewing all
+    fpsCurrentFloor = 'floor1';
+    document.querySelectorAll('.floor-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.floor-btn[data-floor="floor1"]').classList.add('active');
+    Object.entries(G).forEach(([k,g]) => { g.visible = k === 'floor1'; });
+    G.structure.visible = false;
+    G.outdoor.visible = true;
+  } else {
+    fpsCurrentFloor = floor;
+  }
+
+  // Save orbital state
+  savedCamPos = camera.position.clone();
+  savedTarget = controls.target.clone();
+
+  // Disable orbit controls
+  controls.enabled = false;
+  fpsMode = true;
+
+  // Position camera at spawn
+  const spawn = fpsSpawns[fpsCurrentFloor] || fpsSpawns.floor1;
+  camera.position.set(spawn.x, getFloorEyeY(fpsCurrentFloor), spawn.z);
+  camera.lookAt(spawn.x, getFloorEyeY(fpsCurrentFloor), spawn.z - 1);
+
+  // UI updates
+  document.getElementById('btn-fps').classList.add('active');
+  document.getElementById('fps-crosshair').style.display = 'block';
+  document.getElementById('fps-hints').classList.add('visible');
+  document.getElementById('instructions').style.display = 'none';
+
+  // Lock pointer after a brief hint display
+  setTimeout(() => {
+    document.getElementById('fps-hints').classList.remove('visible');
+    fpsControls.lock();
+  }, 1800);
+}
+
+function exitFPS() {
+  fpsMode = false;
+  fpsControls.unlock();
+  controls.enabled = true;
+  fpsKeys.forward = fpsKeys.backward = fpsKeys.left = fpsKeys.right = false;
+
+  // Restore camera
+  if (savedCamPos) camera.position.copy(savedCamPos);
+  if (savedTarget) controls.target.copy(savedTarget);
+
+  // UI updates
+  document.getElementById('btn-fps').classList.remove('active');
+  document.getElementById('fps-crosshair').style.display = 'none';
+  document.getElementById('fps-hints').classList.remove('visible');
+  document.getElementById('instructions').style.display = '';
+}
+
+function fpsTeleportToFloor(floor) {
+  fpsCurrentFloor = floor;
+  const spawn = fpsSpawns[floor] || fpsSpawns.floor1;
+  camera.position.set(spawn.x, getFloorEyeY(floor), spawn.z);
+}
+
+// Pointer lock events
+fpsControls.addEventListener('unlock', () => {
+  if (fpsMode) exitFPS();
+});
+
+// FPS button
+document.getElementById('btn-fps').onclick = () => {
+  if (fpsMode) exitFPS();
+  else enterFPS();
+};
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+  if (!fpsMode) return;
+  switch(e.code) {
+    case 'KeyW': case 'ArrowUp':    fpsKeys.forward = true; break;
+    case 'KeyS': case 'ArrowDown':  fpsKeys.backward = true; break;
+    case 'KeyA': case 'ArrowLeft':  fpsKeys.left = true; break;
+    case 'KeyD': case 'ArrowRight': fpsKeys.right = true; break;
+  }
+});
+document.addEventListener('keyup', (e) => {
+  if (!fpsMode) return;
+  switch(e.code) {
+    case 'KeyW': case 'ArrowUp':    fpsKeys.forward = false; break;
+    case 'KeyS': case 'ArrowDown':  fpsKeys.backward = false; break;
+    case 'KeyA': case 'ArrowLeft':  fpsKeys.left = false; break;
+    case 'KeyD': case 'ArrowRight': fpsKeys.right = false; break;
+  }
+});
+
+// Click to re-lock if in FPS mode but unlocked
+renderer.domElement.addEventListener('click', () => {
+  if (fpsMode && !fpsControls.isLocked) fpsControls.lock();
+});
+
+let fpsPrevTime = performance.now();
+function updateFPS() {
+  if (!fpsMode || !fpsControls.isLocked) return;
+  const now = performance.now();
+  const dt = (now - fpsPrevTime) / 1000;
+  fpsPrevTime = now;
+
+  const dir = new THREE.Vector3();
+  camera.getWorldDirection(dir);
+  dir.y = 0;
+  dir.normalize();
+  const right = new THREE.Vector3().crossVectors(dir, camera.up).normalize();
+
+  const move = new THREE.Vector3();
+  if (fpsKeys.forward)  move.add(dir);
+  if (fpsKeys.backward) move.sub(dir);
+  if (fpsKeys.left)     move.sub(right);
+  if (fpsKeys.right)    move.add(right);
+  if (move.lengthSq() > 0) move.normalize();
+
+  const bounds = fpsBounds[fpsCurrentFloor] || fpsBounds.floor1;
+  camera.position.x = Math.max(bounds.xMin, Math.min(bounds.xMax, camera.position.x + move.x * fpsSpeed * dt));
+  camera.position.z = Math.max(bounds.zMin, Math.min(bounds.zMax, camera.position.z + move.z * fpsSpeed * dt));
+  camera.position.y = getFloorEyeY(fpsCurrentFloor);
+}
+
+// ═══════════════════════════════════════════════════
 // RENDER LOOP
 // ═══════════════════════════════════════════════════
 (function animate(){
   requestAnimationFrame(animate);
-  controls.update();
+  if (fpsMode) { updateFPS(); } else { controls.update(); }
   fireLight.intensity = 0.7+Math.sin(Date.now()*0.005)*0.4;
   renderer.render(scene,camera);
 })();
