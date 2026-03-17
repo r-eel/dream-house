@@ -6,6 +6,7 @@ import './rooms.js';
 import { placeAllFurniture } from './furniture.js';
 import { buildOutdoor, fireLight } from './outdoor.js';
 import { controls, fpsMode, updateFPS } from './controls.js';
+import { renderFrame } from './options.js';
 import './ui.js';
 
 // ═══════════════════════════════════════════════════
@@ -21,7 +22,7 @@ buildOutdoor();
   requestAnimationFrame(animate);
   if (fpsMode) { updateFPS(); } else { controls.update(); }
   if (fireLight) fireLight.intensity = 0.7+Math.sin(Date.now()*0.005)*0.4;
-  renderer.render(scene,camera);
+  if (!renderFrame()) renderer.render(scene,camera);
 })();
 
 window.addEventListener('resize',()=>{
