@@ -91,13 +91,14 @@ canvas { display: block; }
 #fps-crosshair::before { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
 #fps-crosshair::after { height: 2px; width: 100%; top: 50%; transform: translateY(-50%); }
 #options-panel {
-  position: absolute; top: 72px; right: 16px;
-  z-index: 10; display: flex; flex-direction: column; align-items: flex-end;
+  position: absolute; top: 72px; left: 16px;
+  z-index: 10; display: flex; flex-direction: column; align-items: flex-start;
 }
 #options-content {
   background: rgba(42,36,28,0.92); border: 1px solid rgba(212,165,116,0.3);
   border-radius: 10px; padding: 10px 14px; backdrop-filter: blur(10px);
   min-width: 180px; margin-top: 2px;
+  max-height: 500px; opacity: 1; transition: all 0.3s ease; overflow: hidden;
 }
 #options-content.collapsed { max-height: 0; opacity: 0; padding: 0 14px; pointer-events: none; border-color: transparent; }
 .option-row {
