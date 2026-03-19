@@ -55,6 +55,32 @@ box(0.15, 6, 8, M.glass, G.floor1, W/2+9, FY.F1+3, 6);    // outer side wall
 // Glass ceiling for maximum sunlight
 box(8, 0.15, 8, M.glass, G.floor1, W/2+5, FY.F1+6, 6);
 roomLight(W/2+5, FY.F1+5, 6, G.floor1, 0.4, 10, 0xFFF4D0);
+// Cat tree — tall scratching post with platforms
+cyl(0.4, 0.4, 5, 8, M.walnut, G.floor1, W/2+7, FY.F1+2.5, 8);       // trunk
+box(2.5, 0.3, 2.5, M.oak, G.floor1, W/2+7, FY.F1+2.5, 8);           // mid platform
+box(2, 0.3, 2, M.oak, G.floor1, W/2+7, FY.F1+4.5, 8);               // top platform
+cyl(1, 1, 0.6, 8, new THREE.MeshStandardMaterial({color:0x8B7355,roughness:0.95}),
+  G.floor1, W/2+7, FY.F1+5, 8);                                       // cozy bed on top
+// Litter Robot — round dome shape
+cyl(1.2, 1.2, 1.8, 12, new THREE.MeshStandardMaterial({color:0xE8E8E8,roughness:0.3}),
+  G.floor1, W/2+3, FY.F1+0.9, 3);                                     // base
+const litterDome = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 8, 0, Math.PI*2, 0, Math.PI/2),
+  new THREE.MeshStandardMaterial({color:0xD0D0D0, roughness:0.2}));
+litterDome.position.set(W/2+3, FY.F1+1.8, 3);
+G.floor1.add(litterDome);
+// Food & water bowls
+cyl(0.4, 0.5, 0.3, 8, M.metal, G.floor1, W/2+4, FY.F1+0.15, 9);     // food bowl
+cyl(0.4, 0.5, 0.3, 8, M.metal, G.floor1, W/2+5, FY.F1+0.15, 9);     // water bowl
+// Water fountain — taller bowl with blue water
+cyl(0.5, 0.6, 0.5, 10, M.metal, G.floor1, W/2+6, FY.F1+0.25, 9);
+cyl(0.3, 0.3, 0.15, 10, M.water, G.floor1, W/2+6, FY.F1+0.55, 9);   // water surface
+cyl(0.08, 0.08, 0.6, 6, M.metal, G.floor1, W/2+6, FY.F1+0.7, 9);    // fountain spout
+// Mouse toys scattered on the floor
+const toyMat = new THREE.MeshStandardMaterial({color:0xFF6B8A, roughness:0.8});
+const toyMat2 = new THREE.MeshStandardMaterial({color:0x66BBEE, roughness:0.8});
+box(0.3, 0.2, 0.5, toyMat, G.floor1, W/2+5, FY.F1+0.3, 5);          // pink mouse
+box(0.3, 0.2, 0.5, toyMat2, G.floor1, W/2+7.5, FY.F1+0.3, 4.5);     // blue mouse
+box(0.25, 0.2, 0.4, toyMat, G.floor1, W/2+4, FY.F1+0.3, 7);         // another mouse
 
 roomLight(-16, FY.F1+8, 8, G.floor1, 0.35, 14, 0xFFF0C0);
 roomLight(12, FY.F1+8, -6, G.floor1, 0.5, 16, 0xFFE0A0);
