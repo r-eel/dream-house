@@ -48,12 +48,22 @@ roomFloor(-4, 14, 6, 6, FY.F1+0.2, M.floorBath, 'Main Bathroom',
 // Cat Sunroom — glass conservatory bumped out from the house exterior
 roomFloor(W/2+5, 6, 8, 8, FY.F1+0.2, M.floorLiving, 'Cat Sunroom',
   'Salem\'s sunny sanctuary — glass walls, warm light, and all the napping spots a cat could want 🐱☀️', G.floor1, 'floor1');
-// Glass walls — three exterior sides
-box(8, 6, 0.15, M.glass, G.floor1, W/2+5, FY.F1+3, 2);    // back wall
-box(8, 6, 0.15, M.glass, G.floor1, W/2+5, FY.F1+3, 10);   // front wall
-box(0.15, 6, 8, M.glass, G.floor1, W/2+9, FY.F1+3, 6);    // outer side wall
-// Glass ceiling for maximum sunlight
-box(8, 0.15, 8, M.glass, G.floor1, W/2+5, FY.F1+6, 6);
+// Glass walls — three exterior sides (tinted so they're visible)
+const sunroomGlass = new THREE.MeshStandardMaterial({
+  color: 0xAADDFF, roughness: 0.05, metalness: 0.2,
+  transparent: true, opacity: 0.45, side: THREE.DoubleSide
+});
+box(8, 6, 0.2, sunroomGlass, G.floor1, W/2+5, FY.F1+3, 2);    // back wall
+box(8, 6, 0.2, sunroomGlass, G.floor1, W/2+5, FY.F1+3, 10);   // front wall
+box(0.2, 6, 8, sunroomGlass, G.floor1, W/2+9, FY.F1+3, 6);    // outer side wall
+// Glass ceiling — slightly tinted
+box(8, 0.2, 8, sunroomGlass, G.floor1, W/2+5, FY.F1+6, 6);
+// Frame edges for visibility
+const frameMat = new THREE.MeshStandardMaterial({color: 0x8B7355, roughness: 0.5});
+box(0.2, 6, 0.2, frameMat, G.floor1, W/2+1, FY.F1+3, 2);    // corner posts
+box(0.2, 6, 0.2, frameMat, G.floor1, W/2+9, FY.F1+3, 2);
+box(0.2, 6, 0.2, frameMat, G.floor1, W/2+9, FY.F1+3, 10);
+box(0.2, 6, 0.2, frameMat, G.floor1, W/2+1, FY.F1+3, 10);
 roomLight(W/2+5, FY.F1+5, 6, G.floor1, 0.4, 10, 0xFFF4D0);
 // Cat tree — tall scratching post with platforms
 cyl(0.4, 0.4, 5, 8, M.walnut, G.floor1, W/2+7, FY.F1+2.5, 8);       // trunk
