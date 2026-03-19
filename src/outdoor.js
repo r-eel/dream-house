@@ -19,29 +19,32 @@ export function buildOutdoor() {
   ground.receiveShadow = true;
   G.outdoor.add(ground);
 
-  // Patio
-  roomFloor(-8, D/2+12, 20, 10, FY.F1-0.1, M.patio, 'Patio',
+  // Patio — dining area right off the house
+  roomFloor(-12, D/2+14, 22, 12, FY.F1-0.1, M.patio, 'Patio',
     'Outdoor entertaining — grill, seating area, umbrellas 🪑', G.outdoor, 'outdoor');
 
-  // Patio furniture
-  box(6, 2, 6, M.oak, G.outdoor, -8, FY.F1+1, D/2+14);
-  for(let dx of [-4, 4]) for(let dz of [-4, 4]) {
+  // Patio furniture — dining table with chairs
+  box(6, 2, 6, M.oak, G.outdoor, -12, FY.F1+1, D/2+14);
+  for(let dx of [-5, 5]) for(let dz of [-5, 5]) {
     const chairAngle = Math.atan2(-dx, -dz);
-    diningChair(-8+dx, D/2+14+dz, FY.F1, G.outdoor, chairAngle);
+    diningChair(-12+dx, D/2+14+dz, FY.F1, G.outdoor, chairAngle);
   }
   // Umbrella
-  cyl(0.15,0.15,6,8, M.metal, G.outdoor, -8, FY.F1+4, D/2+14);
+  cyl(0.15,0.15,6,8, M.metal, G.outdoor, -12, FY.F1+4, D/2+14);
   const umbMesh = new THREE.Mesh(new THREE.ConeGeometry(4, 1.5, 8, 1, true),
     new THREE.MeshStandardMaterial({color:0xCC8844,roughness:0.9,side:THREE.DoubleSide}));
-  umbMesh.position.set(-8, FY.F1+7, D/2+14);
+  umbMesh.position.set(-12, FY.F1+7, D/2+14);
   G.outdoor.add(umbMesh);
 
-  // String lights triangle
-  tree(-20, D/2+22, FY.F1, G.outdoor, 1.3);
+  // Grill — near patio but offset
+  box(3, 3, 2, M.metal, G.outdoor, 2, FY.F1+1.5, D/2+14);
+
+  // String lights triangle — spread wider
+  tree(-24, D/2+30, FY.F1, G.outdoor, 1.3);
   const triPts = [
-    {x: -14, y: FY.F1+9, z: D/2},
-    {x: -2,  y: FY.F1+9, z: D/2},
-    {x: -20, y: FY.F1+8, z: D/2+22},
+    {x: -18, y: FY.F1+9, z: D/2+4},
+    {x: -2,  y: FY.F1+9, z: D/2+4},
+    {x: -24, y: FY.F1+8, z: D/2+30},
   ];
   const bulbMat = new THREE.MeshStandardMaterial({color:0xFFDD88,emissive:0xFFCC66,emissiveIntensity:0.8});
   for(let edge=0; edge<3; edge++) {
@@ -78,43 +81,40 @@ export function buildOutdoor() {
     }
   }
 
-  // Grill
-  box(3, 3, 2, M.metal, G.outdoor, 4, FY.F1+1.5, D/2+12);
-
-  // Fire pit
-  const fp = cyl(3.5, 4, 1.5, 16, M.stone, G.outdoor, -8, FY.F1+0.75, D/2+26);
+  // Fire pit — pushed further back from patio
+  const fp = cyl(3.5, 4, 1.5, 16, M.stone, G.outdoor, -12, FY.F1+0.75, D/2+34);
   rooms.push({ name:'Fire Pit', desc:'Gather around — s\'mores, stargazing, and good conversations 🔥',
     mesh: fp, material: M.stone, line: null, floor:'outdoor' });
-  cyl(2.5, 2.5, 0.5, 16, M.fire, G.outdoor, -8, FY.F1+1.5, D/2+26);
+  cyl(2.5, 2.5, 0.5, 16, M.fire, G.outdoor, -12, FY.F1+1.5, D/2+34);
   fireLight = new THREE.PointLight(0xff6622, 1, 20);
-  fireLight.position.set(-8, FY.F1+3, D/2+26);
+  fireLight.position.set(-12, FY.F1+3, D/2+34);
   G.outdoor.add(fireLight);
 
-  // Adirondack chairs around fire pit
+  // Adirondack chairs around fire pit — wider ring
   for(let angle=0; angle<Math.PI*2; angle+=Math.PI/3) {
-    const chairX=-8+Math.cos(angle)*6.5, chairZ=D/2+26+Math.sin(angle)*6.5;
+    const chairX=-12+Math.cos(angle)*8, chairZ=D/2+34+Math.sin(angle)*8;
     adirondackChair(chairX, chairZ, FY.F1, G.outdoor, -angle - Math.PI/2);
   }
 
-  // Swimming Pool — positioned next to patio
+  // Swimming Pool — off to the right, its own zone
   // Pool deck surround
-  box(20, 0.5, 14, M.patio, G.outdoor, 10, FY.F1+0.1, D/2+28);
+  box(20, 0.5, 14, M.patio, G.outdoor, 16, FY.F1+0.1, D/2+34);
   // Pool walls (stone coping raised above ground)
-  box(16, 1.2, 10, M.stone, G.outdoor, 10, FY.F1+0.5, D/2+28);
+  box(16, 1.2, 10, M.stone, G.outdoor, 16, FY.F1+0.5, D/2+34);
   // Pool interior (dark blue basin)
   box(14.5, 1, 8.5, new THREE.MeshStandardMaterial({color:0x1A4A6A, roughness:0.3}),
-    G.outdoor, 10, FY.F1+0.4, D/2+28);
+    G.outdoor, 16, FY.F1+0.4, D/2+34);
   // Water surface — clearly above ground
-  const poolWater = box(14, 0.2, 8, M.water, G.outdoor, 10, FY.F1+1.0, D/2+28);
+  const poolWater = box(14, 0.2, 8, M.water, G.outdoor, 16, FY.F1+1.0, D/2+34);
   rooms.push({ name:'Swimming Pool', desc:'Cannonballs, Marco Polo, and lazy summer afternoons 🏊',
     mesh: poolWater, material: M.water, line: null, floor:'outdoor' });
   // Pool glow
   const poolLight = new THREE.PointLight(0x66CCEE, 0.6, 20);
-  poolLight.position.set(10, FY.F1+2, D/2+28);
+  poolLight.position.set(16, FY.F1+2, D/2+34);
   G.outdoor.add(poolLight);
-  // Lounge chairs along the pool
+  // Lounge chairs along the pool — spaced out
   for(let i=-2; i<=2; i++) {
-    adirondackChair(10+i*3.5, D/2+36, FY.F1, G.outdoor, Math.PI);
+    adirondackChair(16+i*4, D/2+43, FY.F1, G.outdoor, Math.PI);
   }
 
   // Stone pathway
