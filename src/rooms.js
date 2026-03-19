@@ -166,4 +166,4 @@ label('♨️ Hot Tub', new THREE.Vector3(22,FY.F3+4,-10), 'floor3');
 label('🔥 Fire Pit', new THREE.Vector3(-8,FY.F1+4,D/2+26), 'outdoor');
 label('🪑 Patio', new THREE.Vector3(-8,FY.F1+4,D/2+12), 'outdoor');
 label('🐱 Sunroom', new THREE.Vector3(22,FY.F1+6,5), 'floor1');
-label('🏊 Pool', new THREE.Vector3(20,FY.F1+4,D/2+14), 'outdoor');
+label('🏊 Pool', new THREE.Vector3(10,FY.F1+4,D/2+28), 'outdoor');
