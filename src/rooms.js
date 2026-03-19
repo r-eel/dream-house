@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { W, D, FY, SH } from './constants.js';
 import { M } from './materials.js';
-import { box, roomFloor, roomLight, rooms } from './primitives.js';
+import { box, cyl, roomFloor, roomLight, rooms } from './primitives.js';
 import { G } from './groups.js';
 
 // ═══════════════════════════════════════════════════
@@ -48,49 +48,30 @@ roomFloor(-4, 14, 6, 6, FY.F1+0.2, M.floorBath, 'Main Bathroom',
 // Cat Sunroom — glass conservatory bumped out from the house exterior
 roomFloor(W/2+5, 6, 8, 8, FY.F1+0.2, M.floorLiving, 'Cat Sunroom',
   'Salem\'s sunny sanctuary — glass walls, warm light, and all the napping spots a cat could want 🐱☀️', G.floor1, 'floor1');
-// Glass walls — three exterior sides (tinted so they're visible)
-const sunroomGlass = new THREE.MeshStandardMaterial({
-  color: 0xAADDFF, roughness: 0.05, metalness: 0.2,
-  transparent: true, opacity: 0.45, side: THREE.DoubleSide
-});
-box(8, 6, 0.2, sunroomGlass, G.floor1, W/2+5, FY.F1+3, 2);    // back wall
-box(8, 6, 0.2, sunroomGlass, G.floor1, W/2+5, FY.F1+3, 10);   // front wall
-box(0.2, 6, 8, sunroomGlass, G.floor1, W/2+9, FY.F1+3, 6);    // outer side wall
-// Glass ceiling — slightly tinted
-box(8, 0.2, 8, sunroomGlass, G.floor1, W/2+5, FY.F1+6, 6);
-// Frame edges for visibility
-const frameMat = new THREE.MeshStandardMaterial({color: 0x8B7355, roughness: 0.5});
-box(0.2, 6, 0.2, frameMat, G.floor1, W/2+1, FY.F1+3, 2);    // corner posts
-box(0.2, 6, 0.2, frameMat, G.floor1, W/2+9, FY.F1+3, 2);
-box(0.2, 6, 0.2, frameMat, G.floor1, W/2+9, FY.F1+3, 10);
-box(0.2, 6, 0.2, frameMat, G.floor1, W/2+1, FY.F1+3, 10);
+// Glass walls with wooden frame posts
+box(8, 6, 0.2, M.glass, G.floor1, W/2+5, FY.F1+3, 2);
+box(8, 6, 0.2, M.glass, G.floor1, W/2+5, FY.F1+3, 10);
+box(0.2, 6, 8, M.glass, G.floor1, W/2+9, FY.F1+3, 6);
+box(8, 0.2, 8, M.glass, G.floor1, W/2+5, FY.F1+6, 6);
+box(0.3, 6, 0.3, M.walnut, G.floor1, W/2+1, FY.F1+3, 2);
+box(0.3, 6, 0.3, M.walnut, G.floor1, W/2+9, FY.F1+3, 2);
+box(0.3, 6, 0.3, M.walnut, G.floor1, W/2+9, FY.F1+3, 10);
+box(0.3, 6, 0.3, M.walnut, G.floor1, W/2+1, FY.F1+3, 10);
 roomLight(W/2+5, FY.F1+5, 6, G.floor1, 0.4, 10, 0xFFF4D0);
-// Cat tree — tall scratching post with platforms
-cyl(0.4, 0.4, 5, 8, M.walnut, G.floor1, W/2+7, FY.F1+2.5, 8);       // trunk
-box(2.5, 0.3, 2.5, M.oak, G.floor1, W/2+7, FY.F1+2.5, 8);           // mid platform
-box(2, 0.3, 2, M.oak, G.floor1, W/2+7, FY.F1+4.5, 8);               // top platform
-cyl(1, 1, 0.6, 8, new THREE.MeshStandardMaterial({color:0x8B7355,roughness:0.95}),
-  G.floor1, W/2+7, FY.F1+5, 8);                                       // cozy bed on top
-// Litter Robot — round dome shape
+// Cat tree
+cyl(0.4, 0.4, 5, 8, M.walnut, G.floor1, W/2+7, FY.F1+2.5, 8);
+box(2.5, 0.3, 2.5, M.oak, G.floor1, W/2+7, FY.F1+2.5, 8);
+box(2, 0.3, 2, M.oak, G.floor1, W/2+7, FY.F1+4.5, 8);
+// Litter Robot
 cyl(1.2, 1.2, 1.8, 12, new THREE.MeshStandardMaterial({color:0xE8E8E8,roughness:0.3}),
-  G.floor1, W/2+3, FY.F1+0.9, 3);                                     // base
-const litterDome = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 8, 0, Math.PI*2, 0, Math.PI/2),
-  new THREE.MeshStandardMaterial({color:0xD0D0D0, roughness:0.2}));
-litterDome.position.set(W/2+3, FY.F1+1.8, 3);
-G.floor1.add(litterDome);
-// Food & water bowls
-cyl(0.4, 0.5, 0.3, 8, M.metal, G.floor1, W/2+4, FY.F1+0.15, 9);     // food bowl
-cyl(0.4, 0.5, 0.3, 8, M.metal, G.floor1, W/2+5, FY.F1+0.15, 9);     // water bowl
-// Water fountain — taller bowl with blue water
+  G.floor1, W/2+3, FY.F1+0.9, 3);
+// Food bowls + water fountain
+cyl(0.4, 0.5, 0.3, 8, M.metal, G.floor1, W/2+4, FY.F1+0.15, 9);
+cyl(0.4, 0.5, 0.3, 8, M.metal, G.floor1, W/2+5, FY.F1+0.15, 9);
 cyl(0.5, 0.6, 0.5, 10, M.metal, G.floor1, W/2+6, FY.F1+0.25, 9);
-cyl(0.3, 0.3, 0.15, 10, M.water, G.floor1, W/2+6, FY.F1+0.55, 9);   // water surface
-cyl(0.08, 0.08, 0.6, 6, M.metal, G.floor1, W/2+6, FY.F1+0.7, 9);    // fountain spout
-// Mouse toys scattered on the floor
-const toyMat = new THREE.MeshStandardMaterial({color:0xFF6B8A, roughness:0.8});
-const toyMat2 = new THREE.MeshStandardMaterial({color:0x66BBEE, roughness:0.8});
-box(0.3, 0.2, 0.5, toyMat, G.floor1, W/2+5, FY.F1+0.3, 5);          // pink mouse
-box(0.3, 0.2, 0.5, toyMat2, G.floor1, W/2+7.5, FY.F1+0.3, 4.5);     // blue mouse
-box(0.25, 0.2, 0.4, toyMat, G.floor1, W/2+4, FY.F1+0.3, 7);         // another mouse
+// Mouse toys
+box(0.3, 0.2, 0.5, new THREE.MeshStandardMaterial({color:0xFF6B8A,roughness:0.8}), G.floor1, W/2+5, FY.F1+0.3, 5);
+box(0.3, 0.2, 0.5, new THREE.MeshStandardMaterial({color:0x66BBEE,roughness:0.8}), G.floor1, W/2+7.5, FY.F1+0.3, 4.5);
 
 roomLight(-16, FY.F1+8, 8, G.floor1, 0.35, 14, 0xFFF0C0);
 roomLight(12, FY.F1+8, -6, G.floor1, 0.5, 16, 0xFFE0A0);
@@ -199,7 +180,7 @@ label('👑 Master', new THREE.Vector3(6,FY.F3+7,-4), 'floor3');
 label('👗 Closet', new THREE.Vector3(6,FY.F3+6,11), 'floor3');
 label('🛁 Bath', new THREE.Vector3(16,FY.F3+6,11), 'floor3');
 label('♨️ Hot Tub', new THREE.Vector3(22,FY.F3+4,-10), 'floor3');
-label('🔥 Fire Pit', new THREE.Vector3(-12,FY.F1+4,D/2+34), 'outdoor');
-label('🪑 Patio', new THREE.Vector3(-12,FY.F1+4,D/2+14), 'outdoor');
+label('🔥 Fire Pit', new THREE.Vector3(-10,FY.F1+4,D/2+36), 'outdoor');
+label('🪑 Patio', new THREE.Vector3(-8,FY.F1+4,D/2+12), 'outdoor');
 label('🐱 Sunroom', new THREE.Vector3(W/2+5,FY.F1+6,6), 'floor1');
-label('🏊 Pool', new THREE.Vector3(16,FY.F1+4,D/2+34), 'outdoor');
+label('🏊 Pool', new THREE.Vector3(16,FY.F1+4,D/2+36), 'outdoor');

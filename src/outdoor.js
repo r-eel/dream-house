@@ -19,32 +19,29 @@ export function buildOutdoor() {
   ground.receiveShadow = true;
   G.outdoor.add(ground);
 
-  // Patio — dining area right off the house
-  roomFloor(-12, D/2+14, 22, 12, FY.F1-0.1, M.patio, 'Patio',
+  // Patio
+  roomFloor(-8, D/2+12, 20, 10, FY.F1-0.1, M.patio, 'Patio',
     'Outdoor entertaining — grill, seating area, umbrellas 🪑', G.outdoor, 'outdoor');
 
-  // Patio furniture — dining table with chairs
-  box(6, 2, 6, M.oak, G.outdoor, -12, FY.F1+1, D/2+14);
-  for(let dx of [-5, 5]) for(let dz of [-5, 5]) {
+  // Patio furniture
+  box(6, 2, 6, M.oak, G.outdoor, -8, FY.F1+1, D/2+14);
+  for(let dx of [-4, 4]) for(let dz of [-4, 4]) {
     const chairAngle = Math.atan2(-dx, -dz);
-    diningChair(-12+dx, D/2+14+dz, FY.F1, G.outdoor, chairAngle);
+    diningChair(-8+dx, D/2+14+dz, FY.F1, G.outdoor, chairAngle);
   }
   // Umbrella
-  cyl(0.15,0.15,6,8, M.metal, G.outdoor, -12, FY.F1+4, D/2+14);
+  cyl(0.15,0.15,6,8, M.metal, G.outdoor, -8, FY.F1+4, D/2+14);
   const umbMesh = new THREE.Mesh(new THREE.ConeGeometry(4, 1.5, 8, 1, true),
     new THREE.MeshStandardMaterial({color:0xCC8844,roughness:0.9,side:THREE.DoubleSide}));
-  umbMesh.position.set(-12, FY.F1+7, D/2+14);
+  umbMesh.position.set(-8, FY.F1+7, D/2+14);
   G.outdoor.add(umbMesh);
 
-  // Grill — near patio but offset
-  box(3, 3, 2, M.metal, G.outdoor, 2, FY.F1+1.5, D/2+14);
-
-  // String lights triangle — spread wider
-  tree(-24, D/2+30, FY.F1, G.outdoor, 1.3);
+  // String lights triangle
+  tree(-20, D/2+22, FY.F1, G.outdoor, 1.3);
   const triPts = [
-    {x: -18, y: FY.F1+9, z: D/2+4},
-    {x: -2,  y: FY.F1+9, z: D/2+4},
-    {x: -24, y: FY.F1+8, z: D/2+30},
+    {x: -14, y: FY.F1+9, z: D/2},
+    {x: -2,  y: FY.F1+9, z: D/2},
+    {x: -20, y: FY.F1+8, z: D/2+22},
   ];
   const bulbMat = new THREE.MeshStandardMaterial({color:0xFFDD88,emissive:0xFFCC66,emissiveIntensity:0.8});
   for(let edge=0; edge<3; edge++) {
@@ -81,41 +78,54 @@ export function buildOutdoor() {
     }
   }
 
-  // Fire pit — pushed further back from patio
-  const fp = cyl(3.5, 4, 1.5, 16, M.stone, G.outdoor, -12, FY.F1+0.75, D/2+34);
+  // Grill
+  box(3, 3, 2, M.metal, G.outdoor, 4, FY.F1+1.5, D/2+12);
+
+  // Fire pit — further back from patio
+  const fp = cyl(3.5, 4, 1.5, 16, M.stone, G.outdoor, -10, FY.F1+0.75, D/2+36);
   rooms.push({ name:'Fire Pit', desc:'Gather around — s\'mores, stargazing, and good conversations 🔥',
     mesh: fp, material: M.stone, line: null, floor:'outdoor' });
-  cyl(2.5, 2.5, 0.5, 16, M.fire, G.outdoor, -12, FY.F1+1.5, D/2+34);
+  cyl(2.5, 2.5, 0.5, 16, M.fire, G.outdoor, -10, FY.F1+1.5, D/2+36);
   fireLight = new THREE.PointLight(0xff6622, 1, 20);
-  fireLight.position.set(-12, FY.F1+3, D/2+34);
+  fireLight.position.set(-10, FY.F1+3, D/2+36);
   G.outdoor.add(fireLight);
 
   // Adirondack chairs around fire pit — wider ring
   for(let angle=0; angle<Math.PI*2; angle+=Math.PI/3) {
-    const chairX=-12+Math.cos(angle)*8, chairZ=D/2+34+Math.sin(angle)*8;
+    const chairX=-10+Math.cos(angle)*8, chairZ=D/2+36+Math.sin(angle)*8;
     adirondackChair(chairX, chairZ, FY.F1, G.outdoor, -angle - Math.PI/2);
   }
 
-  // Swimming Pool — off to the right, its own zone
+  // Swimming Pool — its own zone to the right
   // Pool deck surround
-  box(20, 0.5, 14, M.patio, G.outdoor, 16, FY.F1+0.1, D/2+34);
+  box(20, 0.5, 14, M.patio, G.outdoor, 16, FY.F1+0.1, D/2+36);
   // Pool walls (stone coping raised above ground)
-  box(16, 1.2, 10, M.stone, G.outdoor, 16, FY.F1+0.5, D/2+34);
+  box(16, 1.2, 10, M.stone, G.outdoor, 16, FY.F1+0.5, D/2+36);
   // Pool interior (dark blue basin)
   box(14.5, 1, 8.5, new THREE.MeshStandardMaterial({color:0x1A4A6A, roughness:0.3}),
-    G.outdoor, 16, FY.F1+0.4, D/2+34);
+    G.outdoor, 16, FY.F1+0.4, D/2+36);
   // Water surface — clearly above ground
-  const poolWater = box(14, 0.2, 8, M.water, G.outdoor, 16, FY.F1+1.0, D/2+34);
+  const poolWater = box(14, 0.2, 8, M.water, G.outdoor, 16, FY.F1+1.0, D/2+36);
   rooms.push({ name:'Swimming Pool', desc:'Cannonballs, Marco Polo, and lazy summer afternoons 🏊',
     mesh: poolWater, material: M.water, line: null, floor:'outdoor' });
   // Pool glow
   const poolLight = new THREE.PointLight(0x66CCEE, 0.6, 20);
-  poolLight.position.set(16, FY.F1+2, D/2+34);
+  poolLight.position.set(16, FY.F1+2, D/2+36);
   G.outdoor.add(poolLight);
   // Lounge chairs along the pool — spaced out
   for(let i=-2; i<=2; i++) {
-    adirondackChair(16+i*4, D/2+43, FY.F1, G.outdoor, Math.PI);
+    adirondackChair(16+i*4, D/2+44, FY.F1, G.outdoor, Math.PI);
   }
+
+  // Birdhouse — right outside the cat sunroom
+  cyl(0.15, 0.15, 5, 6, M.walnut, G.outdoor, W/2+6, FY.F1+2.5, 6);
+  box(1.5, 1.2, 1.5, new THREE.MeshStandardMaterial({color:0xCC4444, roughness:0.8}),
+    G.outdoor, W/2+6, FY.F1+5.3, 6);
+  const bhRoof = new THREE.Mesh(new THREE.ConeGeometry(1.3, 0.8, 4),
+    new THREE.MeshStandardMaterial({color:0x5A3A1A, roughness:0.7}));
+  bhRoof.position.set(W/2+6, FY.F1+6.3, 6);
+  bhRoof.rotation.y = Math.PI/4;
+  G.outdoor.add(bhRoof);
 
   // Stone pathway
   for(let i=0; i<8; i++) {
@@ -155,22 +165,6 @@ export function buildOutdoor() {
     if(i < -7 || i > 7) cyl(1.5, 1.5, 2, 8, bMat, G.outdoor, i, FY.F1+1, -D/2-2.5);
     if(Math.abs(i)<18) cyl(1.5, 1.5, 2, 8, bMat, G.outdoor, i, FY.F1+1, D/2+2.5);
   }
-
-  // Birdhouse — right outside the cat sunroom for Salem's entertainment
-  cyl(0.15, 0.15, 5, 6, M.walnut, G.outdoor, W/2+6, FY.F1+2.5, 6);  // post
-  box(1.5, 1.2, 1.5, new THREE.MeshStandardMaterial({color:0xCC4444, roughness:0.8}),
-    G.outdoor, W/2+6, FY.F1+5.3, 6);                                   // house body
-  // Roof — little peaked top
-  const bhRoof = new THREE.Mesh(new THREE.ConeGeometry(1.3, 0.8, 4),
-    new THREE.MeshStandardMaterial({color:0x5A3A1A, roughness:0.7}));
-  bhRoof.position.set(W/2+6, FY.F1+6.3, 6);
-  bhRoof.rotation.y = Math.PI/4;
-  G.outdoor.add(bhRoof);
-  // Entry hole
-  cyl(0.2, 0.2, 0.1, 8, new THREE.MeshStandardMaterial({color:0x1A1A1A}),
-    G.outdoor, W/2+5.24, FY.F1+5.4, 6);
-  // Little perch
-  cyl(0.05, 0.05, 0.4, 4, M.walnut, G.outdoor, W/2+5.15, FY.F1+5.1, 6);
 
   // Flower beds
   flowerBed(-20, -D/2-1, FY.F1, 8, 2, G.outdoor);
