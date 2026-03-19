@@ -25,6 +25,7 @@
 - **Living room**: High ceilings, drop-down projector, big fireplace, large modular U-shaped couch
 - **Office**: Lots of windows, bay window seating area
 - **Full bathroom** on main floor
+- **Cat Play Area**: Salem's dedicated room — cat tree, scratching posts, sunny window perch 🐱
 - Bay window seating in office AND possibly living room
 
 ### Floor 2
@@ -51,6 +52,7 @@
 - Seating with umbrellas
 - Lawn chairs
 - Fire pit
+- **Swimming pool** with lounge chairs
 
 ## Key Notes
 - Rob works remote — office is important

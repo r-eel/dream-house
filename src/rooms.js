@@ -45,6 +45,17 @@ roomFloor(-42, -2, 30, 20, FY.F1+0.2, M.floorUtility, 'Garage',
 roomFloor(-4, 14, 6, 6, FY.F1+0.2, M.floorBath, 'Main Bathroom',
   'Full bath on the main floor — stone tile, walnut vanity 🚿', G.floor1, 'floor1');
 
+// Cat Sunroom — glass-walled extension off the living room for Salem
+roomFloor(22, 5, 8, 8, FY.F1+0.2, M.floorLiving, 'Cat Sunroom',
+  'Salem\'s sunny sanctuary — glass walls, warm light, and all the napping spots a cat could want 🐱☀️', G.floor1, 'floor1');
+// Glass walls
+box(8, 6, 0.15, M.glass, G.floor1, 22, FY.F1+3, 1);   // back wall
+box(8, 6, 0.15, M.glass, G.floor1, 22, FY.F1+3, 9);    // front wall
+box(0.15, 6, 8, M.glass, G.floor1, 26, FY.F1+3, 5);    // side wall
+// Glass ceiling for maximum sunlight
+box(8, 0.15, 8, M.glass, G.floor1, 22, FY.F1+6, 5);
+roomLight(22, FY.F1+5, 5, G.floor1, 0.4, 10, 0xFFF4D0);
+
 roomLight(-16, FY.F1+8, 8, G.floor1, 0.35, 14, 0xFFF0C0);
 roomLight(12, FY.F1+8, -6, G.floor1, 0.5, 16, 0xFFE0A0);
 roomLight(-16, FY.F1+8, -10, G.floor1, 0.35, 12, 0xFFE8B0);
@@ -154,3 +165,5 @@ label('🛁 Bath', new THREE.Vector3(16,FY.F3+6,11), 'floor3');
 label('♨️ Hot Tub', new THREE.Vector3(22,FY.F3+4,-10), 'floor3');
 label('🔥 Fire Pit', new THREE.Vector3(-8,FY.F1+4,D/2+26), 'outdoor');
 label('🪑 Patio', new THREE.Vector3(-8,FY.F1+4,D/2+12), 'outdoor');
+label('🐱 Sunroom', new THREE.Vector3(22,FY.F1+6,5), 'floor1');
+label('🏊 Pool', new THREE.Vector3(20,FY.F1+4,D/2+14), 'outdoor');

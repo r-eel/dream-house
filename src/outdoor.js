@@ -96,6 +96,25 @@ export function buildOutdoor() {
     adirondackChair(chairX, chairZ, FY.F1, G.outdoor, -angle - Math.PI/2);
   }
 
+  // Swimming Pool
+  // Pool surround/coping
+  box(16, 0.4, 10, M.stone, G.outdoor, 20, FY.F1-0.05, D/2+14);
+  // Pool basin (recessed)
+  box(14, 1.5, 8, new THREE.MeshStandardMaterial({color:0x3A6A8A, roughness:0.3}),
+    G.outdoor, 20, FY.F1-0.95, D/2+14);
+  // Water surface
+  const poolWater = box(13.5, 0.15, 7.5, M.water, G.outdoor, 20, FY.F1-0.1, D/2+14);
+  rooms.push({ name:'Swimming Pool', desc:'Cannonballs, Marco Polo, and lazy summer afternoons 🏊',
+    mesh: poolWater, material: M.water, line: null, floor:'outdoor' });
+  // Pool light
+  const poolLight = new THREE.PointLight(0x66AACC, 0.4, 15);
+  poolLight.position.set(20, FY.F1+1, D/2+14);
+  G.outdoor.add(poolLight);
+  // Lounge chairs along the pool
+  for(let i=-2; i<=2; i++) {
+    adirondackChair(20+i*3.5, D/2+20, FY.F1, G.outdoor, Math.PI);
+  }
+
   // Stone pathway
   for(let i=0; i<8; i++) {
     box(4, 0.15, 1.5, M.stone, G.outdoor, 0, FY.F1-0.1, -D/2-9-i*3);
