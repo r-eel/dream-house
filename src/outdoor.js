@@ -156,6 +156,22 @@ export function buildOutdoor() {
     if(Math.abs(i)<18) cyl(1.5, 1.5, 2, 8, bMat, G.outdoor, i, FY.F1+1, D/2+2.5);
   }
 
+  // Birdhouse — right outside the cat sunroom for Salem's entertainment
+  cyl(0.15, 0.15, 5, 6, M.walnut, G.outdoor, W/2+6, FY.F1+2.5, 6);  // post
+  box(1.5, 1.2, 1.5, new THREE.MeshStandardMaterial({color:0xCC4444, roughness:0.8}),
+    G.outdoor, W/2+6, FY.F1+5.3, 6);                                   // house body
+  // Roof — little peaked top
+  const bhRoof = new THREE.Mesh(new THREE.ConeGeometry(1.3, 0.8, 4),
+    new THREE.MeshStandardMaterial({color:0x5A3A1A, roughness:0.7}));
+  bhRoof.position.set(W/2+6, FY.F1+6.3, 6);
+  bhRoof.rotation.y = Math.PI/4;
+  G.outdoor.add(bhRoof);
+  // Entry hole
+  cyl(0.2, 0.2, 0.1, 8, new THREE.MeshStandardMaterial({color:0x1A1A1A}),
+    G.outdoor, W/2+5.24, FY.F1+5.4, 6);
+  // Little perch
+  cyl(0.05, 0.05, 0.4, 4, M.walnut, G.outdoor, W/2+5.15, FY.F1+5.1, 6);
+
   // Flower beds
   flowerBed(-20, -D/2-1, FY.F1, 8, 2, G.outdoor);
   flowerBed(-8, -D/2-1, FY.F1, 6, 2, G.outdoor);
